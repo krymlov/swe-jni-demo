@@ -13,11 +13,10 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <junit-jupiter.version>5.8.2</junit-jupiter.version>
 
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-
-        <junit-jupiter.version>5.8.2</junit-jupiter.version>
     </properties>
 
     <repositories>
@@ -111,7 +110,7 @@
                     <forkMode>once</forkMode>
                     <argLine>-Djava.library.path="${basedir}/libs;${java.library.path}"</argLine>
                     <additionalClasspathElements>
-                        <additionalClasspathElement>${basedir}/ephe</additionalClasspathElement>
+                        <additionalClasspathElement>ephe</additionalClasspathElement>
                     </additionalClasspathElements>
                 </configuration>
             </plugin>

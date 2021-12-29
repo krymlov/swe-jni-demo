@@ -9,6 +9,6 @@ public class SweMiniTest {
 
     @Test
     void test_swe_mini() {
-        swe_mini(new SwephNative(null), 1, 1, 2022);
+        swe_mini(new SwephNative("ephe"), 1, 1, 2022);
     }
 }
