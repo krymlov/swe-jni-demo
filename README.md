@@ -1,11 +1,17 @@
 # swe-jni-demo
 
-swe-jni-demo demonstrates the use of JNI interface using: 
+swe-jni-demo demonstrates the use of JNI interface based on:
 - https://www.astro.com/ftp/swisseph/src/swemini.c
-
-and the following related projects:
-- https://github.com/krymlov/swe-jni-lib
 - https://github.com/krymlov/swe-java-lib
+- https://github.com/krymlov/swe-jni-lib
+
+To build and run the project from command line you need:
+- access to public maven repository
+- https://maven.apache.org
+- JDK 8 or newer
+
+Inside the folder swe-jni-demo run the following command:
+- mvn clean package exec:exec
 
 # Swiss Ephemeris License
 
