@@ -13,7 +13,7 @@ To build and run the project from command line you need:
 Inside the folder swe-jni-demo run the following command:
 - mvn clean package exec:exec
 
-####Restrictions:
+### Restrictions:
 - project includes swe-jni-lib for Windows x64 only, copied from:
   - https://github.com/krymlov/swe-jni-lib/tree/main/x64/Release
 
