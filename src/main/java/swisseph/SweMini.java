@@ -71,20 +71,21 @@ import org.swisseph.SwephNative;
 import java.util.Scanner;
 
 import static java.lang.Integer.parseInt;
+import static org.swisseph.api.ISweConstants.EPHE_PATH;
 import static swisseph.SweConst.*;
 
 public class SweMini {
     public static void main(String[] args) {
-        final ISwissEph sweph = new SwephNative("ephe");
+        try (ISwissEph sweph = new SwephNative(EPHE_PATH)) {
+            try (Scanner sc = new Scanner(System.in)) {
+                while (true) {
+                    System.out.println("\nDate (d.m.y) ?");
 
-        try (Scanner sc = new Scanner(System.in)) {
-            while (true) {
-                System.out.println("\nDate (d.m.y) ?");
+                    String[] str = sc.nextLine().split("\\.");
+                    if (str.length < 3) return;
 
-                String[] str = sc.nextLine().split("\\.");
-                if (str.length < 3) return;
-
-                swe_mini(sweph, parseInt(str[0]), parseInt(str[1]), parseInt(str[2]));
+                    swe_mini(sweph, parseInt(str[0]), parseInt(str[1]), parseInt(str[2]));
+                }
             }
         }
     }
