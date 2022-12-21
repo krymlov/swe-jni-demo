@@ -1,5 +1,15 @@
 package swisseph;
 
+import static java.lang.Integer.parseInt;
+import static org.swisseph.api.ISweConstants.EPHE_PATH;
+import static swisseph.SweConst.SEFLG_SPEED;
+import static swisseph.SweConst.SE_CHIRON;
+import static swisseph.SweConst.SE_EARTH;
+import static swisseph.SweConst.SE_GREG_CAL;
+import static swisseph.SweConst.SE_SUN;
+
+import java.util.Scanner;
+
 /*
   swemini.c	A minimal program to test the Swiss Ephemeris.
 
@@ -68,14 +78,11 @@ package swisseph;
 import org.swisseph.ISwissEph;
 import org.swisseph.SwephNative;
 
-import java.util.Scanner;
-
-import static java.lang.Integer.parseInt;
-import static org.swisseph.api.ISweConstants.EPHE_PATH;
-import static swisseph.SweConst.*;
-
 public class SweMini {
     public static void main(String[] args) {
+//    	-Djava.library.path="C:\Users\kiran\Documents\sts4\swe-all\swe-java-lib\target" -jar swe-2.10.03.jar
+    	System.out.println(System.getProperty("java.library.path"));
+    	System.out.println(System.getProperty("project.basedir"));
         try (ISwissEph sweph = new SwephNative(EPHE_PATH)) {
             try (Scanner sc = new Scanner(System.in)) {
                 while (true) {
