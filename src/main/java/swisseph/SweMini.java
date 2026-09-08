@@ -65,32 +65,31 @@ package swisseph;
   for promoting such software, products or services.
 */
 
-import org.swisseph.ISwissEph;
-import org.swisseph.SwephNative;
-
 import java.util.Scanner;
 
 import static java.lang.Integer.parseInt;
-import static org.swisseph.api.ISweConstants.EPHE_PATH;
-import static swisseph.SweConst.*;
 
 public class SweMini {
+    static int SEFLG_SPEED = 256;    // high precision speed
+    static int SE_GREG_CAL = 1;
+
     public static void main(String[] args) {
-        try (ISwissEph sweph = new SwephNative(EPHE_PATH)) {
-            try (Scanner sc = new Scanner(System.in)) {
-                while (true) {
-                    System.out.println("\nDate (d.m.y) ?");
+        SwephExp.loadSweCurrentLibrary();
+        SwephExp sweph = new SwephExp();
 
-                    String[] str = sc.nextLine().split("\\.");
-                    if (str.length < 3) return;
+        try (Scanner sc = new Scanner(System.in)) {
+            while (true) {
+                System.out.println("\nDate (d.m.y) ?");
 
-                    swe_mini(sweph, parseInt(str[0]), parseInt(str[1]), parseInt(str[2]));
-                }
+                String[] str = sc.nextLine().split("\\.");
+                if (str.length < 3) return;
+
+                swe_mini(sweph, parseInt(str[0]), parseInt(str[1]), parseInt(str[2]));
             }
         }
     }
 
-    public static void swe_mini(ISwissEph sweph, int jday, int jmon, int jyear) {
+    public static void swe_mini(SwephExp sweph, int jday, int jmon, int jyear) {
         final StringBuilder serr = new StringBuilder();
         final double[] x2 = new double[6];
         double tjd, te, jut = 0.0;
@@ -113,8 +112,8 @@ public class SweMini {
         /*
          * a loop over all planets
          */
-        for (p = SE_SUN; p <= SE_CHIRON; p++) {
-            if (p == SE_EARTH) continue;
+        for (p = 0; p <= 15; p++) {
+            if (p == 14) continue;
 
             /*
              * do the coordinate calculation for this planet p

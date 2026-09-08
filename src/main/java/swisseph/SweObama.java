@@ -27,20 +27,26 @@ package swisseph;
  * This example program is in the Public Domain.
  */
 
-import org.swisseph.ISwissEph;
-import org.swisseph.SwephNative;
-
-import static org.swisseph.api.ISweConstants.EPHE_PATH;
-import static swisseph.SweConst.*;
-
 public class SweObama {
+    // local, not org.swisseph.SweConst - that class lives in swe-java-lib (swisseph:swe),
+    // and this demo depends only on swe-api, the raw JNI bindings; see SweMini for the
+    // same convention. Values are swephexp.h's own.
+    static final int SE_GREG_CAL = 1;
+    static final int SEFLG_SWIEPH = 2;
+    static final int SEFLG_SPEED = 256;
+    static final int SE_SUN = 0;
+    static final int SE_TRUE_NODE = 11;
+    static final int OK = 0;
+    static final int ERR = -1;
+
     public static void main(String[] args) {
-        try (ISwissEph sweph = new SwephNative(EPHE_PATH)) {
-            swe_obama(sweph);
-        }
+        SwephExp.loadSweCurrentLibrary();
+        SwephExp sweph = new SwephExp();
+        sweph.swe_set_ephe_path("ephe");
+        swe_obama(sweph);
     }
 
-    public static int swe_obama(ISwissEph sweph) {
+    public static int swe_obama(SwephExp sweph) {
         int iday = 5;        // day  in range 1..31
         int imon = 8;        // month in range 1..12
         int iyar = 1961;    // year in range -12998 .. 16799
