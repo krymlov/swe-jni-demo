@@ -23,6 +23,16 @@
             <version>2.10.03j6f</version>
         </dependency>
 
+        <!-- Deliberate exception to this project's own "swe-api alone" rule, on the author's
+             instruction: SweTest needs ISwissEph so it can run the same command line through
+             either the native SwephNative or the pure-Java SwissEph, which swe-api alone has
+             no notion of - see SweTest's class javadoc and SwissEphEngineComparisonTest. -->
+        <dependency>
+            <groupId>swisseph</groupId>
+            <artifactId>swe</artifactId>
+            <version>2.10.03j6f</version>
+        </dependency>
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>

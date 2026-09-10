@@ -2,16 +2,31 @@ package swisseph;
 
 import java.util.Locale;
 
+import org.swisseph.ISwissEph;
+import org.swisseph.SwephNative;
+
 /**
  * A Java port of astro.com's own reference program, <b>swetest.c</b>, on top of the raw JNI
- * bindings in {@link SwephExp}:
+ * bindings in {@link SwephExp} - reached through {@link org.swisseph.ISwissEph} rather than
+ * called on {@code SwephExp} directly, which is what lets this run against either engine:
  * <p>
  * <a href="https://www.astro.com/ftp/swisseph/src/swetest.c">swetest.c</a>
  * <p>
- * Everything here goes through {@code SwephExp} - the same 106 native entry points the C
- * program calls into - so this doubles as the largest worked example the project has of using
- * that layer directly: {@code double[]} out-parameters, {@code StringBuilder} for {@code char*}
- * buffers, and the {@code SE_*}/{@code SEFLG_*} flag vocabulary.
+ * Every call that reaches Swiss Ephemeris goes through {@link #sw}, an
+ * {@link org.swisseph.ISwissEph} - the same 106 entry points {@code SwephExp} declares, as
+ * instance methods rather than static ones, so this doubles as the largest worked example the
+ * project has of using that layer directly: {@code double[]} out-parameters,
+ * {@code StringBuilder} for {@code char*} buffers, and the {@code SE_*}/{@code SEFLG_*} flag
+ * vocabulary.
+ *
+ * <h2>Two engines, one command line</h2>
+ * {@code ISwissEph} has two implementations in {@code swe-java-lib}: the native
+ * {@link org.swisseph.SwephNative} (the default here, and everywhere else in this workspace)
+ * and the pure-Java {@code swisseph.SwissEph} port. {@link #swe_test(ISwissEph, String[])} runs
+ * a command line against whichever one is handed to it, which is what
+ * {@code SwissEphEngineComparisonTest} uses to run the same line through both and diff the
+ * output - the whole reason this project, alone among the demo modules, depends on
+ * {@code swe-java-lib} rather than {@code swe-api} alone.
  *
  * <h2>It is deliberately shaped like the C, not like idiomatic Java</h2>
  * The static fields below are swetest.c's own file-scope globals, under their own names; the
@@ -24,10 +39,13 @@ import java.util.Locale;
  * stdout, so {@link #swe_test(String[])} can be called from a test and its result compared
  * with the real program's. {@link #main(String[])} prints it.
  *
- * <h2>Constants come from {@code SweConst}</h2>
- * Not hand-copied from {@code swephexp.h}. There are some sixty of them here, and a workspace
- * rule this project shares exists precisely for that: transcribing flag values by hand is how
- * a demo ends up quietly computing something else.
+ * <h2>Constants are generated, not imported</h2>
+ * {@code swephexp.h}'s {@code SE_*}/{@code SEFLG_*} values are hand-generated locally by
+ * {@code tools/extract-swetest-consts.py} rather than imported from {@code SweConst}
+ * ({@code swe-java-lib}), because {@code swe-java-lib} was not on this project's classpath when
+ * that generator was written, and duplicating one hundred already-correct constants a second
+ * way was not worth undoing now that it is. Transcribing flag values by hand is how a demo ends
+ * up quietly computing something else, which is the reason for generating them at all.
  *
  * <h2>What is not ported, and why</h2>
  * <ul>
@@ -278,6 +296,27 @@ public class SweTest {
     /** what -edir was given, or the directory this project ships; print_asteroids reads it */
     static String ephePath = "ephe";
 
+    /**
+     * The engine every {@code swe_*} call in this class reaches Swiss Ephemeris through.
+     * {@link #swe_test(String[])} defaults it to a {@link SwephNative} the first time it runs,
+     * so every existing caller (including {@code main()} and the tests already written against
+     * the single-argument overload) keeps working unchanged; {@link #useSwissEph(ISwissEph)} and
+     * {@link #swe_test(ISwissEph, String[])} are how a caller picks the pure-Java
+     * {@code swisseph.SwissEph} instead - see the class javadoc.
+     */
+    static ISwissEph sw;
+
+    /**
+     * Selects the {@link ISwissEph} that {@link #swe_test(String[])} runs against from here on,
+     * for callers that want to reuse the single-argument overload (or {@code main()}'s own
+     * argument parsing) across more than one call. Most callers want
+     * {@link #swe_test(ISwissEph, String[])} instead, which sets this and runs one command line
+     * in a single call.
+     */
+    public static void useSwissEph(final ISwissEph swissEph) {
+        sw = swissEph;
+    }
+
     // --------------------------------------------------------------------------- the output
 
     static void p(String s) {
@@ -398,8 +437,23 @@ public class SweTest {
         stdout.flush();
     }
 
+    /**
+     * {@link #swe_test(String[])} against a specific {@link ISwissEph} rather than whatever
+     * {@link #useSwissEph(ISwissEph)} last set (or the default native engine, the first time).
+     * This is the entry point {@code SwissEphEngineComparisonTest} drives both engines through.
+     */
+    public static String swe_test(final ISwissEph swissEph, final String[] argv) {
+        useSwissEph(swissEph);
+        return swe_test(argv);
+    }
+
     /** swetest.c's {@code main()}, with its output returned rather than printed */
     public static String swe_test(String[] argv) {
+        // swetest.c has no notion of a second engine, so its own main() has nothing to default -
+        // this is the one line with no C original: SwephNative is what every other class in the
+        // workspace defaults to, and every pre-existing caller of this overload expects the
+        // native engine's numbers, so a caller that never touches useSwissEph() sees no change.
+        if (null == sw) sw = new SwephNative(ephePath);
         out = new StringBuilder();
         resetGlobals();
 
@@ -728,7 +782,7 @@ public class SweTest {
                 }
                 ipldiff = letter_to_ipl(sp.isEmpty() ? '\0' : sp.charAt(0));
                 if (ipldiff < 0) ipldiff = SE_SUN;
-                spnam2 = SwephExp.swe_get_planet_name(ipldiff);
+                spnam2 = sw.swe_get_planet_name(ipldiff);
             } else if (a.equals("-roundsec")) {
                 round_flag |= BIT_ROUND_SEC;
             } else if (a.equals("-roundmin")) {
@@ -783,30 +837,30 @@ public class SweTest {
         // the directory the project ships, which is what its own tests and demos use
         if (ephepath.isEmpty()) ephepath = "ephe";
         ephePath = ephepath;
-        if (whicheph != SEFLG_MOSEPH) SwephExp.swe_set_ephe_path(ephepath);
-        if ((whicheph & SEFLG_JPLEPH) != 0) SwephExp.swe_set_jpl_file(fname);
+        if (whicheph != SEFLG_MOSEPH) sw.swe_set_ephe_path(ephepath);
+        if ((whicheph & SEFLG_JPLEPH) != 0) sw.swe_set_jpl_file(fname);
 
         if (do_set_astro_models) {
-            SwephExp.swe_set_astro_models(new StringBuilder(astro_models), iflag);
+            sw.swe_set_astro_models(new StringBuilder(astro_models), iflag);
             final StringBuilder sdet = new StringBuilder();
-            SwephExp.swe_get_astro_models(new StringBuilder(astro_models), sdet, iflag);
+            sw.swe_get_astro_models(new StringBuilder(astro_models), sdet, iflag);
             smod = sdet.toString();
         }
         // the legacy signature takes AS_BOOL as an int, not a Java boolean
-        if (inut) SwephExp.swe_set_interpolate_nut(1);
+        if (inut) sw.swe_set_interpolate_nut(1);
 
         if ((iflag & SEFLG_SIDEREAL) != 0 || do_ayanamsa) {
             if ((sid_mode & SE_SIDM_USER) != 0)
-                SwephExp.swe_set_sid_mode(sid_mode, aya_t0, aya_val0);
+                sw.swe_set_sid_mode(sid_mode, aya_t0, aya_val0);
             else
-                SwephExp.swe_set_sid_mode(sid_mode, 0, 0);
+                sw.swe_set_sid_mode(sid_mode, 0, 0);
         }
 
         geopos[0] = top_long;
         geopos[1] = top_lat;
         geopos[2] = top_elev;
-        SwephExp.swe_set_topo(top_long, top_lat, top_elev);
-        if (tid_acc != 0) SwephExp.swe_set_tid_acc(tid_acc);
+        sw.swe_set_topo(top_long, top_lat, top_elev);
+        if (tid_acc != 0) sw.swe_set_tid_acc(tid_acc);
         serr.setLength(0);
         serr_save = "";
         serr_warn = "";
@@ -825,7 +879,7 @@ public class SweTest {
             gregflag = tjd < 2299160.5 ? SE_JUL_CAL : SE_GREG_CAL;
             if (sdate.contains("jul")) { gregflag = SE_JUL_CAL; gregflag_auto = false; }
             else if (sdate.contains("greg")) { gregflag = SE_GREG_CAL; gregflag_auto = false; }
-            SwephExp.swe_revjul(tjd, gregflag, jd, jt);
+            sw.swe_revjul(tjd, gregflag, jd, jt);
             jyear = jd[0]; jmon = jd[1]; jday = jd[2]; jut = jt[0];
             year_start = jyear; mon_start = jmon; day_start = jday;
         } else {
@@ -848,13 +902,13 @@ public class SweTest {
                     if (hms.length > 2) ds = atof(hms[2]);
                 }
                 final double[] dret = new double[2];
-                if (SwephExp.swe_utc_to_jd(jyear, jmon, jday, ih, im, ds, gregflag, dret, serr) == ERR) {
+                if (sw.swe_utc_to_jd(jyear, jmon, jday, ih, im, ds, gregflag, dret, serr) == ERR) {
                     pf(" error in swe_utc_to_jd(): %s\n", serr);
                     return out.toString();
                 }
                 tjd = dret[1];
             } else {
-                tjd = SwephExp.swe_julday(jyear, jmon, jday, jut, gregflag);
+                tjd = sw.swe_julday(jyear, jmon, jday, jut, gregflag);
                 tjd += thour / 24.0;
                 jut = thour;
             }
@@ -862,7 +916,7 @@ public class SweTest {
 
         if (special_event > 0) {
             do_special_event(tjd, ipl, star, special_event, special_mode, geopos, datm, dobs);
-            SwephExp.swe_close();
+            sw.swe_close();
             return out.toString();
         }
 
@@ -871,32 +925,32 @@ public class SweTest {
             if (step_in_minutes) t = tjd + (istep - 1) * tstep / 1440;
             if (step_in_seconds) t = tjd + (istep - 1) * tstep / 86400;
             if (step_in_years)
-                t = SwephExp.swe_julday(year_start + (istep - 1) * (int) tstep, mon_start, day_start, jut, gregflag);
+                t = sw.swe_julday(year_start + (istep - 1) * (int) tstep, mon_start, day_start, jut, gregflag);
             if (step_in_months) {
                 jmon = mon_start + (istep - 1) * (int) tstep;
                 jyear = year_start + (jmon - 1) / 12;
                 jmon = ((jmon - 1) % 12) + 1;
-                t = SwephExp.swe_julday(jyear, jmon, day_start, jut, gregflag);
+                t = sw.swe_julday(jyear, jmon, day_start, jut, gregflag);
             }
             if (gregflag_auto) gregflag = t < 2299160.5 ? SE_JUL_CAL : SE_GREG_CAL;
             // must repeat because gregflag may have changed
             if (step_in_years)
-                t = SwephExp.swe_julday(year_start + (istep - 1) * (int) tstep, mon_start, day_start, jut, gregflag);
+                t = sw.swe_julday(year_start + (istep - 1) * (int) tstep, mon_start, day_start, jut, gregflag);
             if (step_in_months) {
                 jmon = mon_start + (istep - 1) * (int) tstep;
                 jyear = year_start + (jmon - 1) / 12;
                 jmon = ((jmon - 1) % 12) + 1;
-                t = SwephExp.swe_julday(jyear, jmon, day_start, jut, gregflag);
+                t = sw.swe_julday(jyear, jmon, day_start, jut, gregflag);
             }
 
-            delt = SwephExp.swe_deltat_ex(t, iflag, serr);
-            if (!universal_time) delt = SwephExp.swe_deltat_ex(t - delt, iflag, serr);
+            delt = sw.swe_deltat_ex(t, iflag, serr);
+            if (!universal_time) delt = sw.swe_deltat_ex(t - delt, iflag, serr);
             t2 = t;
-            SwephExp.swe_revjul(t2, gregflag, jd, jt);
+            sw.swe_revjul(t2, gregflag, jd, jt);
             jyear = jd[0]; jmon = jd[1]; jday = jd[2]; jut = jt[0];
 
             if (with_header) {
-                if (with_glp) pf("\npath: %s", SwephExp.swe_get_library_path());
+                if (with_glp) pf("\npath: %s", sw.swe_get_library_path());
                 pf("\ndate (dmy) %d.%d.%04d", jday, jmon, jyear);
                 p(gregflag != 0 ? " greg." : " jul.");
                 p(jd_to_time_string(jut));
@@ -905,7 +959,7 @@ public class SweTest {
                 } else {
                     p(" TT");
                 }
-                pf("\t\tversion %s", SwephExp.swe_version());
+                pf("\t\tversion %s", sw.swe_version());
             }
 
             if (universal_time) {
@@ -930,17 +984,17 @@ public class SweTest {
                 }
             }
 
-            SwephExp.swe_calc(te, SE_ECL_NUT, iflag, xobl, serr);
+            sw.swe_calc(te, SE_ECL_NUT, iflag, xobl, serr);
 
             if (with_header) {
                 pf("\nTT:  %.9f", te);
                 if ((iflag & SEFLG_SIDEREAL) != 0) {
-                    if (SwephExp.swe_get_ayanamsa_ex(te, iflag, daya, serr) == ERR) {
+                    if (sw.swe_get_ayanamsa_ex(te, iflag, daya, serr) == ERR) {
                         pf("   error in swe_get_ayanamsa_ex(): %s\n", serr);
                         return out.toString();
                     }
                     pf("   ayanamsa = %s (%s)", dms(daya[0], round_flag),
-                            SwephExp.swe_get_ayanamsa_name(sid_mode));
+                            sw.swe_get_ayanamsa_name(sid_mode));
                 }
                 if (have_geopos)
                     pf("\ngeo. long %f, lat %f, alt %f", geopos[0], geopos[1], geopos[2]);
@@ -968,7 +1022,7 @@ public class SweTest {
                         s1 = dms(top_long, round_flag);
                         s2 = dms(top_lat, round_flag);
                         pf("Houses system %c (%s) for long=%s, lat=%s\n",
-                                (char) ihsy, SwephExp.swe_house_name(ihsy), s1, s2);
+                                (char) ihsy, sw.swe_house_name(ihsy), s1, s2);
                     }
                 }
             }
@@ -976,12 +1030,12 @@ public class SweTest {
 
             if (astpos >= 0) {
                 print_asteroids(tjd, astpos, orb);
-                SwephExp.swe_close();
+                sw.swe_close();
                 return out.toString();
             }
 
             if (do_ayanamsa) {
-                if (SwephExp.swe_get_ayanamsa_ex(te, iflag, daya, serr) == ERR) {
+                if (sw.swe_get_ayanamsa_ex(te, iflag, daya, serr) == ERR) {
                     pf("   error in swe_get_ayanamsa_ex(): %s\n", serr);
                     return out.toString();
                 }
@@ -999,7 +1053,7 @@ public class SweTest {
                         ipl = letter_to_ipl(psp);
                         spnam = "";
                         if (ipl >= SE_SUN && ipl <= SE_VESTA)
-                            spnam = SwephExp.swe_get_planet_name(ipl);
+                            spnam = sw.swe_get_planet_name(ipl);
                         print_line(MODE_LABEL, is_first, 0);
                         is_first = false;
                     }
@@ -1040,18 +1094,18 @@ public class SweTest {
                     if (iflgret != ERR && strpbrk(fmt, "=")) {
                         final double[] mag = new double[1];
                         final StringBuilder sn = new StringBuilder(star);
-                        SwephExp.swe_fixstar_mag(sn, mag, serr);
+                        sw.swe_fixstar_mag(sn, mag, serr);
                         attr[4] = mag[0];
                     }
                     se_pname = star;
                 } else if (do_planeto_centric) {
-                    iflgret = SwephExp.swe_calc_pctr(te, ipl, iplctr, iflag, x, serr);
-                    se_pname = SwephExp.swe_get_planet_name(ipl);
+                    iflgret = sw.swe_calc_pctr(te, ipl, iplctr, iflag, x, serr);
+                    se_pname = sw.swe_get_planet_name(ipl);
                 } else {
-                    iflgret = SwephExp.swe_calc(te, ipl, iflag, x, serr);
+                    iflgret = sw.swe_calc(te, ipl, iflag, x, serr);
                     if (iflgret != ERR && strpbrk(fmt, "+-*/="))
-                        iflgret = SwephExp.swe_pheno(te, ipl, iflag, attr, serr);
-                    se_pname = SwephExp.swe_get_planet_name(ipl);
+                        iflgret = sw.swe_pheno(te, ipl, iflag, attr, serr);
+                    se_pname = sw.swe_get_planet_name(ipl);
                     if (show_file_limit) {
                         final double[] tfstart = new double[1], tfend = new double[1];
                         final int[] denum = new int[1];
@@ -1059,11 +1113,11 @@ public class SweTest {
                         if (ipl == SE_SUN || (ipl >= SE_MERCURY && ipl < SE_CHIRON)) ifno = 0;
                         else if (ipl == SE_MOON) ifno = 1;
                         else if (ipl <= SE_VESTA) ifno = 2;
-                        final String fnam = SwephExp.swe_get_current_file_data(ifno, tfstart, tfend, denum);
+                        final String fnam = sw.swe_get_current_file_data(ifno, tfstart, tfend, denum);
                         if (null != fnam && !fnam.isEmpty()) {
-                            SwephExp.swe_revjul(tfstart[0], gregflag, jd, jt);
+                            sw.swe_revjul(tfstart[0], gregflag, jd, jt);
                             final String sbeg = String.format(Locale.ROOT, "%d.%02d.%04d", jd[2], jd[1], jd[0]);
-                            SwephExp.swe_revjul(tfend[0], gregflag, jd, jt);
+                            sw.swe_revjul(tfend[0], gregflag, jd, jt);
                             final String send = String.format(Locale.ROOT, "%d.%02d.%04d", jd[2], jd[1], jd[0]);
                             pf("range %s: %.1f = %s to %.1f = %s de=%d\n",
                                     fnam, tfstart[0], sbeg, tfend[0], send, denum[0]);
@@ -1073,13 +1127,13 @@ public class SweTest {
                 }
 
                 if ('q' == psp) {       /* delta t */
-                    x[0] = SwephExp.swe_deltat_ex(tut, iflag, serr) * 86400;
+                    x[0] = sw.swe_deltat_ex(tut, iflag, serr) * 86400;
                     x[1] = x[2] = x[3] = 0;
                     x[1] = x[0] / 3600.0;   // to hours
                     se_pname = "Delta T";
                 }
                 if ('x' == psp) {       /* sidereal time */
-                    x[0] = SwephExp.swe_degnorm(SwephExp.swe_sidtime(tut) * 15 + geopos[0]);
+                    x[0] = sw.swe_degnorm(sw.swe_sidtime(tut) * 15 + geopos[0]);
                     x[1] = x[2] = x[3] = 0;
                     se_pname = "Sidereal Time";
                 }
@@ -1095,13 +1149,13 @@ public class SweTest {
                 }
                 if ('y' == psp) {       /* time equation */
                     final double[] teq = new double[1];
-                    iflgret = SwephExp.swe_time_equ(tut, teq, serr);
+                    iflgret = sw.swe_time_equ(tut, teq, serr);
                     x[0] = teq[0] * 86400;  /* in seconds */
                     x[1] = x[2] = x[3] = 0;
                     se_pname = "Time Equ.";
                 }
                 if ('b' == psp) {       /* ayanamsha */
-                    if (SwephExp.swe_get_ayanamsa_ex(te, iflag, daya, serr) == ERR) {
+                    if (sw.swe_get_ayanamsa_ex(te, iflag, daya, serr) == ERR) {
                         pf("   error in swe_get_ayanamsa_ex(): %s\n", serr);
                         iflgret = -1;
                     }
@@ -1131,15 +1185,15 @@ public class SweTest {
                 }
 
                 if (diff_mode != 0) {
-                    SwephExp.swe_calc(te, ipldiff, iflag, x2, serr);
+                    sw.swe_calc(te, ipldiff, iflag, x2, serr);
                     if (diff_mode == DIFF_GEOHEL)
-                        SwephExp.swe_calc(te, ipldiff, iflag | SEFLG_HELCTR, x2, serr);
+                        sw.swe_calc(te, ipldiff, iflag | SEFLG_HELCTR, x2, serr);
                     if (diff_mode == DIFF_DIFF || diff_mode == DIFF_GEOHEL) {
                         for (i = 1; i < 6; i++) x[i] -= x2[i];
-                        x[0] = SwephExp.swe_difdeg2n(x[0], x2[0]);
+                        x[0] = sw.swe_difdeg2n(x[0], x2[0]);
                     } else {    /* DIFF_MIDP */
                         for (i = 1; i < 6; i++) x[i] = (x[i] + x2[i]) / 2;
-                        x[0] = SwephExp.swe_deg_midp(x[0], x2[0]);
+                        x[0] = sw.swe_deg_midp(x[0], x2[0]);
                     }
                 }
 
@@ -1147,18 +1201,18 @@ public class SweTest {
                 if (strpbrk(fmt, "aADdQmzx")) {
                     iflag2 = iflag | SEFLG_EQUATORIAL;
                     if (ipl == SE_FIXSTAR) call_swe_fixstar(star, te, iflag2, xequ);
-                    else if (do_planeto_centric) SwephExp.swe_calc_pctr(te, ipl, iplctr, iflag2, xequ, serr);
-                    else SwephExp.swe_calc(te, ipl, iflag2, xequ, serr);
+                    else if (do_planeto_centric) sw.swe_calc_pctr(te, ipl, iplctr, iflag2, xequ, serr);
+                    else sw.swe_calc(te, ipl, iflag2, xequ, serr);
                     if (diff_mode != 0) {
-                        SwephExp.swe_calc(te, ipldiff, iflag2, x2, serr);
+                        sw.swe_calc(te, ipldiff, iflag2, x2, serr);
                         if (diff_mode == DIFF_DIFF || diff_mode == DIFF_GEOHEL) {
                             if (diff_mode == DIFF_GEOHEL)
-                                SwephExp.swe_calc(te, ipldiff, iflag2 | SEFLG_HELCTR, x2, serr);
+                                sw.swe_calc(te, ipldiff, iflag2 | SEFLG_HELCTR, x2, serr);
                             for (i = 1; i < 6; i++) xequ[i] -= x2[i];
-                            xequ[0] = SwephExp.swe_difdeg2n(xequ[0], x2[0]);
+                            xequ[0] = sw.swe_difdeg2n(xequ[0], x2[0]);
                         } else {
                             for (i = 1; i < 6; i++) xequ[i] = (xequ[i] + x2[i]) / 2;
-                            xequ[0] = SwephExp.swe_deg_midp(xequ[0], x2[0]);
+                            xequ[0] = sw.swe_deg_midp(xequ[0], x2[0]);
                         }
                     }
                 }
@@ -1167,21 +1221,21 @@ public class SweTest {
                 if (strpbrk(fmt, "IiHhKk")) {
                     iflgt = whicheph | SEFLG_EQUATORIAL | SEFLG_TOPOCTR;
                     if (ipl == SE_FIXSTAR) call_swe_fixstar(star, te, iflgt, xt);
-                    else SwephExp.swe_calc(te, ipl, iflgt, xt, serr);
-                    SwephExp.swe_azalt(tut, SE_EQU2HOR, geopos, datm[0], datm[1], xt, xaz);
+                    else sw.swe_calc(te, ipl, iflgt, xt, serr);
+                    sw.swe_azalt(tut, SE_EQU2HOR, geopos, datm[0], datm[1], xt, xaz);
                     if (diff_mode != 0) {
-                        SwephExp.swe_calc(te, ipldiff, iflgt, xt, serr);
-                        SwephExp.swe_azalt(tut, SE_EQU2HOR, geopos, datm[0], datm[1], xt, x2);
+                        sw.swe_calc(te, ipldiff, iflgt, xt, serr);
+                        sw.swe_azalt(tut, SE_EQU2HOR, geopos, datm[0], datm[1], xt, x2);
                         if (diff_mode == DIFF_DIFF || diff_mode == DIFF_GEOHEL) {
                             if (diff_mode == DIFF_GEOHEL) {
-                                SwephExp.swe_calc(te, ipldiff, iflgt | SEFLG_HELCTR, xt, serr);
-                                SwephExp.swe_azalt(tut, SE_EQU2HOR, geopos, datm[0], datm[1], xt, x2);
+                                sw.swe_calc(te, ipldiff, iflgt | SEFLG_HELCTR, xt, serr);
+                                sw.swe_azalt(tut, SE_EQU2HOR, geopos, datm[0], datm[1], xt, x2);
                             }
                             for (i = 1; i < 3; i++) xaz[i] -= x2[i];
-                            xaz[0] = SwephExp.swe_difdeg2n(xaz[0], x2[0]);
+                            xaz[0] = sw.swe_difdeg2n(xaz[0], x2[0]);
                         } else {
                             for (i = 1; i < 3; i++) xaz[i] = (xaz[i] + x2[i]) / 2;
-                            xaz[0] = SwephExp.swe_deg_midp(xaz[0], x2[0]);
+                            xaz[0] = sw.swe_deg_midp(xaz[0], x2[0]);
                         }
                     }
                 }
@@ -1190,13 +1244,13 @@ public class SweTest {
                 if (strpbrk(fmt, "XU")) {
                     iflag2 = iflag | SEFLG_XYZ;
                     if (ipl == SE_FIXSTAR) call_swe_fixstar(star, te, iflag2, xcart);
-                    else if (do_planeto_centric) SwephExp.swe_calc_pctr(te, ipl, iplctr, iflag2, xcart, serr);
-                    else SwephExp.swe_calc(te, ipl, iflag2, xcart, serr);
+                    else if (do_planeto_centric) sw.swe_calc_pctr(te, ipl, iplctr, iflag2, xcart, serr);
+                    else sw.swe_calc(te, ipl, iflag2, xcart, serr);
                     if (diff_mode != 0) {
-                        SwephExp.swe_calc(te, ipldiff, iflag2, x2, serr);
+                        sw.swe_calc(te, ipldiff, iflag2, x2, serr);
                         if (diff_mode == DIFF_DIFF || diff_mode == DIFF_GEOHEL) {
                             if (diff_mode == DIFF_GEOHEL)
-                                SwephExp.swe_calc(te, ipldiff, iflag2 | SEFLG_HELCTR, x2, serr);
+                                sw.swe_calc(te, ipldiff, iflag2 | SEFLG_HELCTR, x2, serr);
                             for (i = 0; i < 6; i++) xcart[i] -= x2[i];
                         }
                     }
@@ -1206,13 +1260,13 @@ public class SweTest {
                 if (strpbrk(fmt, "xu")) {
                     iflag2 = iflag | SEFLG_XYZ | SEFLG_EQUATORIAL;
                     if (ipl == SE_FIXSTAR) call_swe_fixstar(star, te, iflag2, xcartq);
-                    else if (do_planeto_centric) SwephExp.swe_calc_pctr(te, ipl, iplctr, iflag2, xcartq, serr);
-                    else SwephExp.swe_calc(te, ipl, iflag2, xcartq, serr);
+                    else if (do_planeto_centric) sw.swe_calc_pctr(te, ipl, iplctr, iflag2, xcartq, serr);
+                    else sw.swe_calc(te, ipl, iflag2, xcartq, serr);
                     if (diff_mode != 0) {
-                        SwephExp.swe_calc(te, ipldiff, iflag2, x2, serr);
+                        sw.swe_calc(te, ipldiff, iflag2, x2, serr);
                         if (diff_mode == DIFF_DIFF || diff_mode == DIFF_GEOHEL) {
                             if (diff_mode == DIFF_GEOHEL)
-                                SwephExp.swe_calc(te, ipldiff, iflag2 | SEFLG_HELCTR, x2, serr);
+                                sw.swe_calc(te, ipldiff, iflag2 | SEFLG_HELCTR, x2, serr);
                             for (i = 0; i < 6; i++) xcartq[i] -= x2[i];
                         }
                     }
@@ -1220,32 +1274,32 @@ public class SweTest {
 
                 /* house position */
                 if (strpbrk(fmt, "gGjzm")) {
-                    armc = SwephExp.swe_degnorm(SwephExp.swe_sidtime(tut) * 15 + geopos[0]);
+                    armc = sw.swe_degnorm(sw.swe_sidtime(tut) * 15 + geopos[0]);
                     System.arraycopy(x, 0, xsv, 0, 6);
                     if (hpos_meth == 1) xsv[1] = 0;
                     star2 = ipl == SE_FIXSTAR ? star : "";
                     if (hpos_meth >= 2 && Character.toUpperCase(ihsy) == 'G') {
                         final double[] dgsect = new double[1];
-                        SwephExp.swe_gauquelin_sector(tut, ipl, new StringBuilder(star2), iflag,
+                        sw.swe_gauquelin_sector(tut, ipl, new StringBuilder(star2), iflag,
                                 hpos_meth, geopos, 0, 0, dgsect, serr);
                         hposj = dgsect[0];
                     } else {
                         if (ihsy == 'i' || ihsy == 'I') {
                             final double[] cusp = new double[13], ascmc = new double[10];
-                            SwephExp.swe_houses_ex(t, iflag, top_lat, top_long, ihsy, cusp, ascmc);
+                            sw.swe_houses_ex(t, iflag, top_lat, top_long, ihsy, cusp, ascmc);
                         }
-                        hposj = SwephExp.swe_house_pos(armc, geopos[1], xobl[0], ihsy, xsv, serr);
+                        hposj = sw.swe_house_pos(armc, geopos[1], xobl[0], ihsy, xsv, serr);
                     }
                     hpos = Character.toUpperCase(ihsy) == 'G' ? (hposj - 1) * 10 : (hposj - 1) * 30;
                     if (diff_mode != 0) {
                         System.arraycopy(x2, 0, xsv, 0, 6);
                         if (hpos_meth == 1) xsv[1] = 0;
-                        hpos2 = SwephExp.swe_house_pos(armc, geopos[1], xobl[0], ihsy, xsv, serr);
+                        hpos2 = sw.swe_house_pos(armc, geopos[1], xobl[0], ihsy, xsv, serr);
                         hpos2 = Character.toUpperCase(ihsy) == 'G' ? (hpos2 - 1) * 10 : (hpos2 - 1) * 30;
                         if (diff_mode == DIFF_DIFF || diff_mode == DIFF_GEOHEL)
-                            hpos = SwephExp.swe_difdeg2n(hpos, hpos2);
+                            hpos = sw.swe_difdeg2n(hpos, hpos2);
                         else
-                            hpos = SwephExp.swe_deg_midp(hpos, hpos2);
+                            hpos = sw.swe_deg_midp(hpos, hpos2);
                     }
                 }
 
@@ -1274,11 +1328,11 @@ public class SweTest {
                 int iofs;
                 if (Character.toUpperCase(ihsy) == 'G') nhouses = 36;  // Gauquelin has 36 cusps
                 iofs = nhouses + 1;
-                iflgret = SwephExp.swe_houses_ex2(t, iflag, top_lat, top_long, ihsy,
+                iflgret = sw.swe_houses_ex2(t, iflag, top_lat, top_long, ihsy,
                         cusp, ascmc, cusp_speed, ascmc_speed, serr);
                 // when swe_houses_ex() fails it always returns Porphyry cusps instead
                 if (iflgret < 0) {
-                    final String msg = "House method " + SwephExp.swe_house_name(ihsy)
+                    final String msg = "House method " + sw.swe_house_name(ihsy)
                             + " failed, Porphyry calculated instead";
                     if (!msg.equals(serr_save)) {
                         p("error: ");
@@ -1306,14 +1360,14 @@ public class SweTest {
                         xequ[1] = x[1];
                         xequ[2] = x[2];
                     } else if (strpbrk(fmt, "aADdQ")) {
-                        SwephExp.swe_cotrans(x, xequ, -xobl[0]);
+                        sw.swe_cotrans(x, xequ, -xobl[0]);
                     }
                     if (strpbrk(fmt, "IiHhKk")) {
                         final double[] gpos = {top_long, top_lat, 0};
-                        SwephExp.swe_azalt(t, SE_ECL2HOR, gpos, datm[0], datm[1], x, xaz);
+                        sw.swe_azalt(t, SE_ECL2HOR, gpos, datm[0], datm[1], x, xaz);
                     }
                     if (strpbrk(fmt, "gGj")) {
-                        hposj = SwephExp.swe_house_pos(armc, geopos[1], xobl[0], ihsy, x, serr);
+                        hposj = sw.swe_house_pos(armc, geopos[1], xobl[0], ihsy, x, serr);
                         hpos = Character.toUpperCase(ihsy) == 'G' ? (hposj - 1) * 10 : (hposj - 1) * 30;
                     }
                     print_line(MODE_HOUSE, is_first, 0);
@@ -1339,7 +1393,7 @@ public class SweTest {
         }
 
         if (do_set_astro_models) p(smod);
-        SwephExp.swe_close();
+        sw.swe_close();
         return out.toString();
     }
 
@@ -1991,7 +2045,7 @@ public class SweTest {
         static String help(char which) {
             final StringBuilder s = new StringBuilder();
             if ('c' == which || '\0' == which) {
-                s.append(infocmd0.replace("Version:", "Version: " + SwephExp.swe_version()));
+                s.append(infocmd0.replace("Version:", "Version: " + sw.swe_version()));
                 s.append(infocmd1).append(infocmd2).append(infocmd3);
                 s.append(infocmd4).append(infocmd5).append(infocmd6);
             }
@@ -2061,7 +2115,7 @@ public class SweTest {
                 case 'Y':
                     if (list_hor && !is_first) break;
                     if (is_label) { p("year"); break; }
-                    t2 = SwephExp.swe_julday(jyear, 1, 1, ju2, gregflag);
+                    t2 = sw.swe_julday(jyear, 1, 1, ju2, gregflag);
                     y_frac = (t - t2) / 365.0;
                     pf("%.2f", jyear + y_frac);
                     break;
@@ -2078,7 +2132,7 @@ public class SweTest {
                         if (ipl <= nhouses) pf("house %2d       ", ipl);
                         else pf("%-15s", hs_nam[ipl - nhouses]);
                     } else if (is_ayana) {
-                        pf("Ayanamsha %s ", SwephExp.swe_get_ayanamsa_name(sid_mode));
+                        pf("Ayanamsha %s ", sw.swe_get_ayanamsa_name(sid_mode));
                     } else if (diff_mode == DIFF_DIFF || diff_mode == DIFF_GEOHEL) {
                         pf("%.3s-%.3s", spnam, spnam2);
                     } else if (diff_mode == DIFF_MIDP) {
@@ -2106,10 +2160,10 @@ public class SweTest {
                         int roundflag = SE_SPLIT_DEG_ROUND_SEC;
                         if ((tstep < 1 && tstep > -1) && step_in_seconds) {
                             roundflag = 0;
-                            SwephExp.swe_split_deg(jut, roundflag, hms, dsecfr, isgn);
+                            sw.swe_split_deg(jut, roundflag, hms, dsecfr, isgn);
                             pf(" %d:%02d:%02.2f", hms[0], hms[1], hms[2] + dsecfr[0]);
                         } else {
-                            SwephExp.swe_split_deg(jut, roundflag, hms, dsecfr, isgn);
+                            sw.swe_split_deg(jut, roundflag, hms, dsecfr, isgn);
                             pf(" %d:%02d:%02d", hms[0], hms[1], hms[2]);
                         }
                         p(universal_time ? " UT" : " TT");
@@ -2317,7 +2371,7 @@ public class SweTest {
                 case 'r':
                     if (is_label) { p("dist"); break; }
                     if (ipl == SE_MOON) {   /* for moon print parallax */
-                        SwephExp.swe_pheno(te, ipl, iflag, dret, serr);
+                        sw.swe_pheno(te, ipl, iflag, dret, serr);
                         pf("%# 13.5f\"", dret[5] * 3600);
                     } else {
                         pf("%# 14.9f", x[2]);
@@ -2376,7 +2430,7 @@ public class SweTest {
                 case 'n': {
                     final double[] xasc = new double[6], xdsc = new double[6];
                     final int imeth = Character.isLowerCase(sc) ? SE_NODBIT_MEAN : SE_NODBIT_OSCU;
-                    iflgret = SwephExp.swe_nod_aps(te, ipl, iflag, imeth, xasc, xdsc, null, null, serr);
+                    iflgret = sw.swe_nod_aps(te, ipl, iflag, imeth, xasc, xdsc, null, null, serr);
                     if (iflgret >= 0 && (ipl <= SE_NEPTUNE || 'N' == sc)) {
                         if (is_label) {
                             p("nodAsc"); p(gap); p("nodDesc");
@@ -2395,7 +2449,7 @@ public class SweTest {
                     if (!is_house) {
                         final double[] xfoc = new double[6], xaph = new double[6], xper = new double[6];
                         int imeth = Character.isLowerCase(sc) ? SE_NODBIT_MEAN : SE_NODBIT_OSCU;
-                        iflgret = SwephExp.swe_nod_aps(te, ipl, iflag, imeth, null, null, xper, xaph, serr);
+                        iflgret = sw.swe_nod_aps(te, ipl, iflag, imeth, null, null, xper, xaph, serr);
                         if (iflgret >= 0 && (ipl <= SE_NEPTUNE || 'F' == sc)) {
                             if (is_label) {
                                 p("peri"); p(gap); p("apo"); p(gap); p("focus");
@@ -2406,7 +2460,7 @@ public class SweTest {
                             pf("%# 11.7f", xaph[0]);
                         }
                         imeth |= SE_NODBIT_FOPOINT;
-                        iflgret = SwephExp.swe_nod_aps(te, ipl, iflag, imeth, null, null, xper, xfoc, serr);
+                        iflgret = sw.swe_nod_aps(te, ipl, iflag, imeth, null, null, xper, xfoc, serr);
                         if (iflgret >= 0 && (ipl <= SE_NEPTUNE || 'F' == sc)) {
                             p(gap);
                             pf("%# 11.7f", xfoc[0]);
@@ -2450,17 +2504,17 @@ public class SweTest {
                             59, 40, 64, 47, 6, 46, 18, 48, 57, 32, 50, 28, 44};
                     if (is_label) { p("hds"); break; }
                     if (is_house) break;
-                    final double xhds = SwephExp.swe_degnorm(x[0] - 223.25);
+                    final double xhds = sw.swe_degnorm(x[0] - 223.25);
                     final int ihex = (int) Math.floor(xhds / 5.625);
                     final int iline = ((int) Math.floor(xhds / 0.9375)) % 6 + 1;
                     final int igate = hexa[ihex];
                     pf("%2d.%d", igate, iline);
-                    if ('V' == sc) pf(" %2d%%", SwephExp.swe_d2l(100 * (xhds / 0.9375 % 1)));
+                    if ('V' == sc) pf(" %2d%%", sw.swe_d2l(100 * (xhds / 0.9375 % 1)));
                     break;
                 }
                 case 'm': {     // Meridian distance
                     if (is_label) { p("MD      "); break; }
-                    double md = SwephExp.swe_difdeg2n(xequ[0], armc);
+                    double md = sw.swe_difdeg2n(xequ[0], armc);
                     if (md < 0) md = -md;
                     if (output_extra_prec) pf("%# 11.11f", md);
                     else pf("%# 11.7f", md);
@@ -2468,7 +2522,7 @@ public class SweTest {
                 }
                 case 'z': {     // Zenith distance
                     if (is_label) { p("ZD      "); break; }
-                    SwephExp.swe_azalt(tut, SE_EQU2HOR, geopos, datm[0], datm[1], xequ, xaz);
+                    sw.swe_azalt(tut, SE_EQU2HOR, geopos, datm[0], datm[1], xequ, xaz);
                     final double zd = 90 - xaz[1];
                     if (output_extra_prec) pf("%# 11.11f", zd);
                     else pf("%# 11.7f", zd);
@@ -2503,9 +2557,9 @@ public class SweTest {
         }
 
         if ((iflg & BIT_ROUND_MIN) != 0) {
-            if ((iflg & BIT_ALLOW_361) == 0) xv = SwephExp.swe_degnorm(xv + 0.5 / 60);
+            if ((iflg & BIT_ALLOW_361) == 0) xv = sw.swe_degnorm(xv + 0.5 / 60);
         } else if ((iflg & BIT_ROUND_SEC) != 0) {
-            if ((iflg & BIT_ALLOW_361) == 0) xv = SwephExp.swe_degnorm(xv + 0.5 / 3600);
+            if ((iflg & BIT_ALLOW_361) == 0) xv = sw.swe_degnorm(xv + 0.5 / 3600);
         } else {
             /* rounding 0.9999999999 to 1 */
             if (output_extra_prec) xv += (xv < 0 ? -1 : 1) * 0.000000005 / 3600.0;
@@ -2606,8 +2660,8 @@ public class SweTest {
     static int call_swe_fixstar(String star, double te, int iflag, double[] x) {
         final StringBuilder sn = new StringBuilder(star);
         final int rc = use_swe_fixstar2
-                ? SwephExp.swe_fixstar2(sn, te, iflag, x, serr)
-                : SwephExp.swe_fixstar(sn, te, iflag, x, serr);
+                ? sw.swe_fixstar2(sn, te, iflag, x, serr)
+                : sw.swe_fixstar(sn, te, iflag, x, serr);
         SweTest.star = sn.toString();
         return rc;
     }
@@ -2618,7 +2672,7 @@ public class SweTest {
      */
     static int get_geocentric_relative_distance(double tjd_et, int ipl, int iflag) {
         final double[] dmax = new double[1], dmin = new double[1], dtrue = new double[1];
-        if (SwephExp.swe_orbit_max_min_true_distance(tjd_et, ipl, iflag, dmax, dmin, dtrue, serr) == ERR)
+        if (sw.swe_orbit_max_min_true_distance(tjd_et, ipl, iflag, dmax, dmin, dtrue, serr) == ERR)
             return 0;
         if (dmax[0] - dmin[0] == 0) return 0;
         final double dtemp = (dtrue[0] - dmin[0]) / (dmax[0] - dmin[0]);
@@ -2689,7 +2743,7 @@ public class SweTest {
 
             /* swetest -lunecl -how: type and percentage for a given time */
             if ((special_mode & SP_MODE_HOW) != 0) {
-                eclflag = SwephExp.swe_lun_eclipse_how(t_ut, whicheph, geopos, eattr, serr);
+                eclflag = sw.swe_lun_eclipse_how(t_ut, whicheph, geopos, eattr, serr);
                 if (eclflag == ERR) { p(serr.toString()); return ERR; }
                 if ((eclflag & SE_ECL_TOTAL) != 0)
                     pf("total lunar eclipse: %f o/o \n", eattr[0]);
@@ -2704,7 +2758,7 @@ public class SweTest {
 
             if ((special_mode & SP_MODE_LOCAL) != 0) {
                 /* locally visible lunar eclipse */
-                eclflag = SwephExp.swe_lun_eclipse_when_loc(t_ut, whicheph, geopos, tret, eattr,
+                eclflag = sw.swe_lun_eclipse_when_loc(t_ut, whicheph, geopos, tret, eattr,
                         direction_flag ? 1 : 0, serr);
                 if (eclflag == ERR) { p(serr.toString()); return ERR; }
                 if ((time_flag & (BIT_TIME_LMT | BIT_TIME_LAT)) != 0) {
@@ -2722,7 +2776,7 @@ public class SweTest {
                 if ((eclflag & SE_ECL_PARTIAL) != 0) { s.setLength(0); s.append("partial "); ecl_type = 2; }
                 s.append("lunar eclipse\t");
 
-                SwephExp.swe_revjul(t_ut, gregflag, jd, jt);
+                sw.swe_revjul(t_ut, gregflag, jd, jt);
                 jyear = jd[0]; jmon = jd[1]; jday = jd[2]; jut = jt[0];
                 sgj = get_gregjul(gregflag, jyear);
                 final double dt = (tret[3] - tret[2]) * 24 * 60;
@@ -2750,11 +2804,11 @@ public class SweTest {
                 s.append(visibleOrDash(eclflag, SE_ECL_PENUMBEND_VISIBLE, tret[7]));
                 if (have_gap_parameter) s.append('\t');
                 s.append(String.format(Locale.ROOT, "dt=%.1f",
-                        SwephExp.swe_deltat_ex(tret[0], whicheph, serr) * 86400.0));
+                        sw.swe_deltat_ex(tret[0], whicheph, serr) * 86400.0));
                 s.append('\n');
             } else {
                 /* global lunar eclipse */
-                eclflag = SwephExp.swe_lun_eclipse_when(t_ut, whicheph, search_flag, tret,
+                eclflag = sw.swe_lun_eclipse_when(t_ut, whicheph, search_flag, tret,
                         direction_flag ? 1 : 0, serr);
                 if (eclflag == ERR) { p(serr.toString()); return ERR; }
                 t_ut = tret[0];
@@ -2763,7 +2817,7 @@ public class SweTest {
                 if ((eclflag & SE_ECL_PARTIAL) != 0) { styp = "Partial"; s.setLength(0); s.append("partial "); ecl_type = 2; }
                 s.append("lunar eclipse\t");
 
-                eclflag = SwephExp.swe_lun_eclipse_how(t_ut, whicheph, geopos, eattr, serr);
+                eclflag = sw.swe_lun_eclipse_how(t_ut, whicheph, geopos, eattr, serr);
                 if (eclflag == ERR) { p(serr.toString()); return ERR; }
                 if ((time_flag & (BIT_TIME_LMT | BIT_TIME_LAT)) != 0) {
                     for (int i = 0; i < 10; i++) {
@@ -2776,13 +2830,13 @@ public class SweTest {
                 }
                 t_ut = tret[0];
                 final StringBuilder e1 = new StringBuilder();
-                if (SwephExp.swe_calc_ut(t_ut, SE_MOON, whicheph | SEFLG_EQUATORIAL, xx, e1) < 0) {
+                if (sw.swe_calc_ut(t_ut, SE_MOON, whicheph | SEFLG_EQUATORIAL, xx, e1) < 0) {
                     p(e1.toString());
                     p("\n");
                 }
-                SwephExp.swe_revjul(t_ut, gregflag, jd, jt);
+                sw.swe_revjul(t_ut, gregflag, jd, jt);
                 jyear = jd[0]; jmon = jd[1]; jday = jd[2]; jut = jt[0];
-                geopos_max[0] = SwephExp.swe_degnorm(xx[0] - SwephExp.swe_sidtime(t_ut) * 15);
+                geopos_max[0] = sw.swe_degnorm(xx[0] - sw.swe_sidtime(t_ut) * 15);
                 if (geopos_max[0] > 180) geopos_max[0] -= 360;
                 geopos_max[1] = xx[1];
                 sgj = get_gregjul(gregflag, jyear);
@@ -2809,14 +2863,14 @@ public class SweTest {
                 s.append(hms_from_tjd(tret[7]));
                 if (have_gap_parameter) s.append('\t');
                 s.append(String.format(Locale.ROOT, "dt=%.1f",
-                        SwephExp.swe_deltat_ex(tret[0], whicheph, serr) * 86400.0));
+                        sw.swe_deltat_ex(tret[0], whicheph, serr) * 86400.0));
                 s.append('\n');
 
                 if ((special_mode & SP_MODE_HOCAL) != 0) {
                     final int[] hms = new int[3];
                     final double[] dfrc = new double[1];
                     final int[] isgn = new int[1];
-                    SwephExp.swe_split_deg(jut, SE_SPLIT_DEG_ROUND_MIN, hms, dfrc, isgn);
+                    sw.swe_split_deg(jut, SE_SPLIT_DEG_ROUND_MIN, hms, dfrc, isgn);
                     s.setLength(0);
                     s.append(String.format(Locale.ROOT, "\"%04d%s %02d %02d %02d.%02d %d\",\n",
                             jyear, sgj, jmon, jday, hms[0], hms[1], ecl_type));
@@ -2846,7 +2900,7 @@ public class SweTest {
         if ((search_flag & SE_ECL_ALLTYPES_SOLAR) == 0) search_flag |= SE_ECL_ALLTYPES_SOLAR;
         /* for local eclipses: set geographic position of observer */
         if ((special_mode & SP_MODE_LOCAL) != 0) {
-            SwephExp.swe_set_topo(geopos[0], geopos[1], geopos[2]);
+            sw.swe_set_topo(geopos[0], geopos[1], geopos[2]);
             if (with_header)
                 pf("\ngeo. long %f, lat %f, alt %f", geopos[0], geopos[1], geopos[2]);
         }
@@ -2857,7 +2911,7 @@ public class SweTest {
 
             /* -solecl -local: next eclipse observable from a given position */
             if ((special_mode & SP_MODE_LOCAL) != 0) {
-                eclflag = SwephExp.swe_sol_eclipse_when_loc(t_ut, whicheph, geopos, tret, eattr,
+                eclflag = sw.swe_sol_eclipse_when_loc(t_ut, whicheph, geopos, tret, eattr,
                         direction_flag ? 1 : 0, serr);
                 if (eclflag == ERR) { p(serr.toString()); return ERR; }
                 has_found = false;
@@ -2876,7 +2930,7 @@ public class SweTest {
                     ii--;
                     continue;
                 }
-                SwephExp.swe_calc(t_ut + SwephExp.swe_deltat_ex(t_ut, whicheph, serr),
+                sw.swe_calc(t_ut + sw.swe_deltat_ex(t_ut, whicheph, serr),
                         SE_ECL_NUT, 0, x, serr);
                 if ((time_flag & (BIT_TIME_LMT | BIT_TIME_LAT)) != 0) {
                     for (int i = 0; i < 10; i++) {
@@ -2888,7 +2942,7 @@ public class SweTest {
                     }
                 }
                 t_ut = tret[0];
-                SwephExp.swe_revjul(t_ut, gregflag, jd, jt);
+                sw.swe_revjul(t_ut, gregflag, jd, jt);
                 jyear = jd[0]; jmon = jd[1]; jday = jd[2]; jut = jt[0];
                 final double dt = (tret[3] - tret[2]) * 24 * 60;
                 sgj = get_gregjul(gregflag, jyear);
@@ -2907,14 +2961,14 @@ public class SweTest {
                 s.append(visibleOrDash(eclflag, SE_ECL_4TH_VISIBLE, tret[4]));
                 if (have_gap_parameter) s.append('\t');
                 s.append(String.format(Locale.ROOT, "dt=%.1f",
-                        SwephExp.swe_deltat_ex(tret[0], whicheph, serr) * 86400.0));
+                        sw.swe_deltat_ex(tret[0], whicheph, serr) * 86400.0));
                 s.append('\n');
                 p(insert_gap_string_for_tabs(s.toString()));
                 continue;
             }
 
             /* -solecl: next eclipse observable from anywhere on earth */
-            eclflag = SwephExp.swe_sol_eclipse_when_glob(t_ut, whicheph, search_flag, tret,
+            eclflag = sw.swe_sol_eclipse_when_glob(t_ut, whicheph, search_flag, tret,
                     direction_flag ? 1 : 0, serr);
             if (eclflag == ERR) { p(serr.toString()); return ERR; }
             t_ut = tret[0];
@@ -2926,7 +2980,7 @@ public class SweTest {
                 s.append(" non-central");
             s.append(" solar\t");
 
-            SwephExp.swe_sol_eclipse_where(t_ut, whicheph, geopos_max, eattr, serr);
+            sw.swe_sol_eclipse_where(t_ut, whicheph, geopos_max, eattr, serr);
             if ((time_flag & (BIT_TIME_LMT | BIT_TIME_LAT)) != 0) {
                 for (int i = 0; i < 10; i++) {
                     if (tret[i] != 0) {
@@ -2936,7 +2990,7 @@ public class SweTest {
                     }
                 }
             }
-            SwephExp.swe_revjul(tret[0], gregflag, jd, jt);
+            sw.swe_revjul(tret[0], gregflag, jd, jt);
             jyear = jd[0]; jmon = jd[1]; jday = jd[2]; jut = jt[0];
             sgj = get_gregjul(gregflag, jyear);
             final String saros = String.format(Locale.ROOT, "%d/%d", (int) eattr[9], (int) eattr[10]);
@@ -2956,7 +3010,7 @@ public class SweTest {
             s.append(hms_from_tjd(tret[3]));
             if (have_gap_parameter) s.append('\t');
             s.append(String.format(Locale.ROOT, "dt=%.1f",
-                    SwephExp.swe_deltat_ex(tret[0], whicheph, serr) * 86400.0));
+                    sw.swe_deltat_ex(tret[0], whicheph, serr) * 86400.0));
             s.append('\n');
             s.append(String.format(Locale.ROOT, "\t%s\t%s",
                     dms(geopos_max[0], BIT_ROUND_SEC), dms(geopos_max[1], BIT_ROUND_SEC)));
@@ -2964,7 +3018,7 @@ public class SweTest {
             sshort.append('\t');
 
             if ((eclflag & SE_ECL_PARTIAL) == 0 && (eclflag & SE_ECL_NONCENTRAL) == 0) {
-                eclflag = SwephExp.swe_sol_eclipse_when_loc(t_ut - 10, whicheph, geopos_max,
+                eclflag = sw.swe_sol_eclipse_when_loc(t_ut - 10, whicheph, geopos_max,
                         tret, eattr, 0, serr);
                 if (eclflag == ERR) { p(serr.toString()); return ERR; }
                 if (Math.abs(tret[0] - t_ut) > 2) p("when_loc returns wrong date\n");
@@ -2981,7 +3035,7 @@ public class SweTest {
                 final int[] hms = new int[3];
                 final double[] dfrc = new double[1];
                 final int[] isgn = new int[1];
-                SwephExp.swe_split_deg(jut, SE_SPLIT_DEG_ROUND_MIN, hms, dfrc, isgn);
+                sw.swe_split_deg(jut, SE_SPLIT_DEG_ROUND_MIN, hms, dfrc, isgn);
                 s.setLength(0);
                 s.append(String.format(Locale.ROOT, "\"%04d%s %02d %02d %02d.%02d %d\",\n",
                         jyear, sgj, jmon, jday, hms[0], hms[1], ecl_type));
@@ -3011,7 +3065,7 @@ public class SweTest {
         if ((search_flag & SE_ECL_ALLTYPES_SOLAR) == 0) search_flag |= SE_ECL_ALLTYPES_SOLAR;
         /* for local occultations: set geographic position of observer */
         if ((special_mode & SP_MODE_LOCAL) != 0) {
-            SwephExp.swe_set_topo(geopos[0], geopos[1], geopos[2]);
+            sw.swe_set_topo(geopos[0], geopos[1], geopos[2]);
             if (with_header)
                 pf("\ngeo. long %f, lat %f, alt %f", geopos[0], geopos[1], geopos[2]);
         }
@@ -3032,7 +3086,7 @@ public class SweTest {
                     search_flag &= ~(SE_ECL_ANNULAR | SE_ECL_ANNULAR_TOTAL);
                     if (search_flag == 0) search_flag = SE_ECL_ALLTYPES_SOLAR;
                 }
-                eclflag = SwephExp.swe_lun_occult_when_loc(t_ut, ipl, sn, whicheph, geopos,
+                eclflag = sw.swe_lun_occult_when_loc(t_ut, ipl, sn, whicheph, geopos,
                         tret, oattr, (direction_flag ? 1 : 0) | SE_ECL_ONE_TRY, serr);
                 if (eclflag == ERR) { p(serr.toString()); return ERR; }
                 if (eclflag == 0) {     /* event not found, try next conjunction */
@@ -3073,8 +3127,8 @@ public class SweTest {
                     ii--;
                     continue;
                 }
-                SwephExp.swe_calc_ut(t_ut, SE_ECL_NUT, 0, x, serr);
-                SwephExp.swe_revjul(tret[0], gregflag, jd, jt);
+                sw.swe_calc_ut(t_ut, SE_ECL_NUT, 0, x, serr);
+                sw.swe_revjul(tret[0], gregflag, jd, jt);
                 jyear = jd[0]; jmon = jd[1]; jday = jd[2]; jut = jt[0];
                 final double dt = (tret[3] - tret[2]) * 24 * 60;
                 s.append(String.format(Locale.ROOT, "%2d.%02d.%04d\t%s\t%f\t%.6f\n",
@@ -3089,12 +3143,12 @@ public class SweTest {
                 s.append(visibleOrDash(eclflag, SE_ECL_4TH_VISIBLE, tret[4]));
                 if (have_gap_parameter) s.append('\t');
                 s.append(String.format(Locale.ROOT, "dt=%.1f",
-                        SwephExp.swe_deltat_ex(tret[0], whicheph, serr) * 86400.0));
+                        sw.swe_deltat_ex(tret[0], whicheph, serr) * 86400.0));
                 s.append('\n');
                 p(insert_gap_string_for_tabs(s.toString()));
             } else {
                 /* global search, one lunar cycle only (SE_ECL_ONE_TRY) */
-                eclflag = SwephExp.swe_lun_occult_when_glob(t_ut, ipl, sn, whicheph, search_flag,
+                eclflag = sw.swe_lun_occult_when_glob(t_ut, ipl, sn, whicheph, search_flag,
                         tret, (direction_flag ? 1 : 0) | SE_ECL_ONE_TRY, serr);
                 if (eclflag == ERR) { p(serr.toString()); return ERR; }
                 if (eclflag == 0) {     /* nothing at this conjunction, try the next */
@@ -3109,7 +3163,7 @@ public class SweTest {
                 if ((eclflag & SE_ECL_NONCENTRAL) != 0 && (eclflag & SE_ECL_PARTIAL) == 0)
                     s.append("non-central ");
                 t_ut = tret[0];
-                SwephExp.swe_lun_occult_where(t_ut, ipl, sn, whicheph, geopos_max, oattr, serr);
+                sw.swe_lun_occult_where(t_ut, ipl, sn, whicheph, geopos_max, oattr, serr);
                 if ((time_flag & (BIT_TIME_LMT | BIT_TIME_LAT)) != 0) {
                     for (int i = 0; i < 10; i++) {
                         if (tret[i] != 0) {
@@ -3119,7 +3173,7 @@ public class SweTest {
                         }
                     }
                 }
-                SwephExp.swe_revjul(tret[0], gregflag, jd, jt);
+                sw.swe_revjul(tret[0], gregflag, jd, jt);
                 jyear = jd[0]; jmon = jd[1]; jday = jd[2]; jut = jt[0];
                 s.append(String.format(Locale.ROOT, "%2d.%02d.%04d\t%s\t%f km\t%f\t%.6f\n",
                         jday, jmon, jyear, hms(jut, BIT_LZEROES), oattr[3], oattr[0], tret[0]));
@@ -3132,12 +3186,12 @@ public class SweTest {
                 s.append(hms_from_tjd(tret[3]));
                 if (have_gap_parameter) s.append('\t');
                 s.append(String.format(Locale.ROOT, "dt=%.1f",
-                        SwephExp.swe_deltat_ex(tret[0], whicheph, serr) * 86400.0));
+                        sw.swe_deltat_ex(tret[0], whicheph, serr) * 86400.0));
                 s.append('\n');
                 s.append(String.format(Locale.ROOT, "\t%s\t%s",
                         dms(geopos_max[0], BIT_ROUND_MIN), dms(geopos_max[1], BIT_ROUND_MIN)));
                 if ((eclflag & SE_ECL_PARTIAL) == 0 && (eclflag & SE_ECL_NONCENTRAL) == 0) {
-                    eclflag = SwephExp.swe_lun_occult_when_loc(t_ut - 10, ipl, sn, whicheph,
+                    eclflag = sw.swe_lun_occult_when_loc(t_ut - 10, ipl, sn, whicheph,
                             geopos_max, tret, oattr, 0, serr);
                     if (eclflag == ERR) { p(serr.toString()); return ERR; }
                     if (Math.abs(tret[0] - t_ut) > 2) p("when_loc returns wrong date\n");
@@ -3151,7 +3205,7 @@ public class SweTest {
                     final int[] hms = new int[3];
                     final double[] dfrc = new double[1];
                     final int[] isgn = new int[1];
-                    SwephExp.swe_split_deg(jut, SE_SPLIT_DEG_ROUND_MIN, hms, dfrc, isgn);
+                    sw.swe_split_deg(jut, SE_SPLIT_DEG_ROUND_MIN, hms, dfrc, isgn);
                     line = String.format(Locale.ROOT, "\"%04d %02d %02d %02d.%02d %d\",\n",
                             jyear, jmon, jday, hms[0], hms[1], ecl_type);
                 }
@@ -3177,7 +3231,7 @@ public class SweTest {
 
         final int[] jd = new int[3];
         final double[] jt = new double[1];
-        SwephExp.swe_revjul(dret[0], gregflag, jd, jt);
+        sw.swe_revjul(dret[0], gregflag, jd, jt);
         jyear = jd[0]; jmon = jd[1]; jday = jd[2]; jut = jt[0];
 
         final String stim0 = remove_whitespace(hms_from_tjd(dret[0]));
@@ -3214,7 +3268,7 @@ public class SweTest {
         if (dobs[3] > 0) helflag |= SE_HELFLAG_OPTICAL_PARAMS;
         if (hel_using_AV) helflag |= SE_HELFLAG_AV;
 
-        obj_name = ipl == SE_FIXSTAR ? star : SwephExp.swe_get_planet_name(ipl);
+        obj_name = ipl == SE_FIXSTAR ? star : sw.swe_get_planet_name(ipl);
         if (with_header) {
             pf("\ngeo. long %f, lat %f, alt %f", geopos[0], geopos[1], geopos[2]);
             p("\n");
@@ -3225,7 +3279,7 @@ public class SweTest {
             else if (ipl == SE_MOON) event_type = SE_EVENING_FIRST;
             else event_type = SE_HELIACAL_RISING;
 
-            retflag = SwephExp.swe_heliacal_ut(t_ut, geopos, datm, dobs, obj_name,
+            retflag = sw.swe_heliacal_ut(t_ut, geopos, datm, dobs, obj_name,
                     event_type, helflag, dret, serr);
             if (retflag == ERR) { p(serr.toString()); return ERR; }
             if ((retc = heliacal_to_lmt_lat(dret, geopos)) == ERR) { p(serr.toString()); return ERR; }
@@ -3237,7 +3291,7 @@ public class SweTest {
             if (ipl == SE_VENUS || ipl == SE_MERCURY) {
                 /* we have the heliacal rising (morning first), now the morning last */
                 event_type = SE_MORNING_LAST;
-                retflag = SwephExp.swe_heliacal_ut(dret[0], geopos, datm, dobs, obj_name,
+                retflag = sw.swe_heliacal_ut(dret[0], geopos, datm, dobs, obj_name,
                         event_type, helflag, dret, serr);
                 if (retflag == ERR) { p(serr.toString()); return ERR; }
                 if ((retc = heliacal_to_lmt_lat(dret, geopos)) == ERR) { p(serr.toString()); return ERR; }
@@ -3249,7 +3303,7 @@ public class SweTest {
                  * every evening appearance before it */
                 if (ipl == SE_MERCURY) {
                     event_type = SE_HELIACAL_RISING;
-                    retflag = SwephExp.swe_heliacal_ut(dret[0], geopos, datm, dobs, obj_name,
+                    retflag = sw.swe_heliacal_ut(dret[0], geopos, datm, dobs, obj_name,
                             event_type, helflag, dret, serr);
                     if (retflag == ERR) { p(serr.toString()); return ERR; }
                     tsave2 = dret[0];
@@ -3257,7 +3311,7 @@ public class SweTest {
 
                 /* evening first */
                 event_type = SE_EVENING_FIRST;
-                retflag = SwephExp.swe_heliacal_ut(tsave1, geopos, datm, dobs, obj_name,
+                retflag = sw.swe_heliacal_ut(tsave1, geopos, datm, dobs, obj_name,
                         event_type, helflag, dret, serr);
                 if (retflag == ERR) { p(serr.toString()); return ERR; }
                 if (ipl == SE_MERCURY && dret[0] > tsave2) continue;
@@ -3268,7 +3322,7 @@ public class SweTest {
             if (ipl == SE_MOON) {
                 /* morning last */
                 event_type = SE_MORNING_LAST;
-                retflag = SwephExp.swe_heliacal_ut(dret[0], geopos, datm, dobs, obj_name,
+                retflag = sw.swe_heliacal_ut(dret[0], geopos, datm, dobs, obj_name,
                         event_type, helflag, dret, serr);
                 if (retflag == ERR) { p(serr.toString()); return ERR; }
                 if ((retc = heliacal_to_lmt_lat(dret, geopos)) == ERR) { p(serr.toString()); return ERR; }
@@ -3276,7 +3330,7 @@ public class SweTest {
             } else {
                 /* heliacal setting (evening last) */
                 event_type = SE_HELIACAL_SETTING;
-                retflag = SwephExp.swe_heliacal_ut(dret[0], geopos, datm, dobs, obj_name,
+                retflag = sw.swe_heliacal_ut(dret[0], geopos, datm, dobs, obj_name,
                         event_type, helflag, dret, serr);
                 if (retflag == ERR) { p(serr.toString()); return ERR; }
                 if ((retc = heliacal_to_lmt_lat(dret, geopos)) == ERR) { p(serr.toString()); return ERR; }
@@ -3357,7 +3411,7 @@ public class SweTest {
             t_ut += geopos[0] / 360.0;
             if ((time_flag & BIT_TIME_LAT) != 0) {
                 final double[] tl = new double[1];
-                iflgret = SwephExp.swe_lmt_to_lat(t_ut, geopos[0], tl, serr);
+                iflgret = sw.swe_lmt_to_lat(t_ut, geopos[0], tl, serr);
                 t_ut = tl[0];
             }
         }
@@ -3384,7 +3438,7 @@ public class SweTest {
         if (trise == 0) {
             s.append("         -\t           -    ");
         } else {
-            SwephExp.swe_revjul(trise, gregflag, jd, jt);
+            sw.swe_revjul(trise, gregflag, jd, jt);
             jyear = jd[0]; jmon = jd[1]; jday = jd[2]; jut = jt[0];
             s.append(String.format(Locale.ROOT, "%2d.%02d.%04d\t%s    ",
                     jday, jmon, jyear, hms(jut, BIT_LZEROES)));
@@ -3395,7 +3449,7 @@ public class SweTest {
         if (tset == 0) {
             s.append("         -\t           -    ");
         } else {
-            SwephExp.swe_revjul(tset, gregflag, jd, jt);
+            sw.swe_revjul(tset, gregflag, jd, jt);
             jyear = jd[0]; jmon = jd[1]; jday = jd[2]; jut = jt[0];
             s.append(String.format(Locale.ROOT, "%2d.%02d.%04d\t%s    ",
                     jday, jmon, jyear, hms(jut, BIT_LZEROES)));
@@ -3429,7 +3483,7 @@ public class SweTest {
         if (hindu != 0) rsmior |= SE_BIT_HINDU_RISING;
         if (Math.abs(geopos[1]) < 60 && ipl >= SE_SUN && ipl <= SE_PLUTO) dayfrac = 0.01;
 
-        SwephExp.swe_set_topo(geopos[0], geopos[1], geopos[2]);
+        sw.swe_set_topo(geopos[0], geopos[1], geopos[2]);
         if (with_header) pf("\ngeo. long %f, lat %f, alt %f", geopos[0], geopos[1], geopos[2]);
         p("\n");
 
@@ -3441,7 +3495,7 @@ public class SweTest {
             // avoids unnecessary calculation for circumpolar objects; without it the output
             // would still be correct, only slower
             if (last_was_empty && (null == star || star.isEmpty())) {
-                rval = SwephExp.swe_calc_ut(tnext, ipl, whicheph | SEFLG_EQUATORIAL, tretl, serr);
+                rval = sw.swe_calc_ut(tnext, ipl, whicheph | SEFLG_EQUATORIAL, tretl, serr);
                 if (rval >= 0) {
                     final double edist = geopos[1] + tretl[1];
                     final double edist2 = geopos[1] - tretl[1];
@@ -3455,7 +3509,7 @@ public class SweTest {
 
             /* rising */
             rsmi = SE_CALC_RISE | rsmior;
-            rval = SwephExp.swe_rise_trans(tnext, ipl, sn, whicheph, rsmi, geopos,
+            rval = sw.swe_rise_trans(tnext, ipl, sn, whicheph, rsmi, geopos,
                     datm[0], datm[1], trisev, serr);
             if (rval == ERR) { p(serr.toString()); return ERR; }
             trise = trisev[0];
@@ -3467,7 +3521,7 @@ public class SweTest {
             loop_count = 0;
             tset = 0;
             while (!do_set && loop_count < 2) {
-                rval = SwephExp.swe_rise_trans(tnext, ipl, sn, whicheph, rsmi, geopos,
+                rval = sw.swe_rise_trans(tnext, ipl, sn, whicheph, rsmi, geopos,
                         datm[0], datm[1], tsetv, serr);
                 if (rval == ERR) { p(serr.toString()); return ERR; }
                 tset = tsetv[0];
@@ -3507,12 +3561,12 @@ public class SweTest {
             final double[] jt = new double[1];
             final double[] t0 = new double[1], t1 = new double[1];
             for (int ii = 0; ii < nstep; ii++, t_ut = tret1sv + 0.001) {
-                if (SwephExp.swe_rise_trans(t_ut, ipl, sn, whicheph, SE_CALC_MTRANSIT, geopos,
+                if (sw.swe_rise_trans(t_ut, ipl, sn, whicheph, SE_CALC_MTRANSIT, geopos,
                         datm[0], datm[1], t0, serr) != OK) {
                     p(serr.toString());
                     return ERR;
                 }
-                if (SwephExp.swe_rise_trans(t_ut, ipl, sn, whicheph, SE_CALC_ITRANSIT, geopos,
+                if (sw.swe_rise_trans(t_ut, ipl, sn, whicheph, SE_CALC_ITRANSIT, geopos,
                         datm[0], datm[1], t1, serr) != OK) {
                     p(serr.toString());
                     return ERR;
@@ -3527,7 +3581,7 @@ public class SweTest {
                 if (t0[0] == 0 || t0[0] > t1[0]) {
                     s.append("         -\t           -    ");
                 } else {
-                    SwephExp.swe_revjul(t0[0], gregflag, jd, jt);
+                    sw.swe_revjul(t0[0], gregflag, jd, jt);
                     s.append(String.format(Locale.ROOT, "%2d.%02d.%04d\t%s    ",
                             jd[2], jd[1], jd[0], hms(jt[0], BIT_LZEROES)));
                 }
@@ -3537,7 +3591,7 @@ public class SweTest {
                 if (t1[0] == 0) {
                     s.append("         -\t           -    \n");
                 } else {
-                    SwephExp.swe_revjul(t1[0], gregflag, jd, jt);
+                    sw.swe_revjul(t1[0], gregflag, jd, jt);
                     s.append(String.format(Locale.ROOT, "%2d.%02d.%04d\t%s\n",
                             jd[2], jd[1], jd[0], hms(jt[0], BIT_LZEROES)));
                 }
@@ -3559,11 +3613,11 @@ public class SweTest {
         final double[] dsecfr = new double[1];
         final int[] isgn = new int[1];
 
-        SwephExp.swe_split_deg(lon, SE_SPLIT_DEG_ROUND_SEC, dms, dsecfr, isgn);
+        sw.swe_split_deg(lon, SE_SPLIT_DEG_ROUND_SEC, dms, dsecfr, isgn);
         final String slon = String.format(Locale.ROOT, "%d%c%02d%02d",
                 Math.abs(dms[0]), lon < 0 ? 'w' : 'e', dms[1], dms[2]);
 
-        SwephExp.swe_split_deg(lat, SE_SPLIT_DEG_ROUND_SEC, dms, dsecfr, isgn);
+        sw.swe_split_deg(lat, SE_SPLIT_DEG_ROUND_SEC, dms, dsecfr, isgn);
         final String slat = String.format(Locale.ROOT, "%d%c%02d%02d",
                 Math.abs(dms[0]), lat < 0 ? 's' : 'n', dms[1], dms[2]);
 
@@ -3575,11 +3629,11 @@ public class SweTest {
         final int[] jd = new int[3];
         final double[] jt = new double[1];
 
-        if (SwephExp.swe_get_orbital_elements(tjd_et, ipl, iflag, dret, serr) == ERR) {
+        if (sw.swe_get_orbital_elements(tjd_et, ipl, iflag, dret, serr) == ERR) {
             pf("%s\n", serr);
             return ERR;
         }
-        SwephExp.swe_revjul(dret[14], gregflag, jd, jt);
+        sw.swe_revjul(dret[14], gregflag, jd, jt);
         final String sdateperi = String.format(Locale.ROOT, "%2d.%02d.%04d,%s",
                 jd[2], jd[1], jd[0], hms(jt[0], BIT_LZEROES));
 
@@ -3634,14 +3688,14 @@ public class SweTest {
         final double[] xx = new double[6];
         for (Integer no : arr) {
             final int ipl = no + SE_AST_OFFSET;
-            final int rc = SwephExp.swe_calc(tjd, ipl, 0, xx, serr);
+            final int rc = sw.swe_calc(tjd, ipl, 0, xx, serr);
             if (rc >= 0 && dref >= 0) {
-                double d = SwephExp.swe_difdeg2n(dref, xx[0]);
+                double d = sw.swe_difdeg2n(dref, xx[0]);
                 if (Math.abs(d) <= orb) {
                     char m = ' ';
                     if (d < 0) { d = -d; m = '-'; }
                     // orb in front, for easy sorting
-                    pf("%.3f%c\t%d\t%-20s\n", d, m, no, SwephExp.swe_get_planet_name(ipl));
+                    pf("%.3f%c\t%d\t%-20s\n", d, m, no, sw.swe_get_planet_name(ipl));
                 }
             }
         }
