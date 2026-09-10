@@ -1,4 +1,4 @@
--b1.1.2000 -solecl -partial -n5 -edirE:\Github\swe-jni-demo\ephe 
+-b1.1.2000 -solecl -partial -n5 -edire:\Github\swe-jni-demo\ephe 
 partial solar	 5.02.2000	  12:49:18.2	277.188704 km	0.5797/0.5797/0.4692	saros 150/16	2451580.034238
 	  10:56:10.8     -            -           14:42:49.4 dt=63.9
 	 134°27' 9"	 -70°12'48"	

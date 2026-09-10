@@ -1,4 +1,4 @@
--b1.1.2000 -pf -xfSpica -occult -n2 -edirE:\Github\swe-jni-demo\ephe 
+-b1.1.2000 -pf -xfSpica -occult -n2 -edire:\Github\swe-jni-demo\ephe 
 total   non-central  7.09.2005	  06:42:27.8	-3476.300001 km	1.000000	2453620.779488
 	  06:04:23.4    06:04:23.4    07:21:04.7    07:21:04.7 dt=64.8
 	-176°46'	  61° 5'

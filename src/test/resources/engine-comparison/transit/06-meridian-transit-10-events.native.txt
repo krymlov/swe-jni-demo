@@ -1,4 +1,4 @@
--b1.1.2000 -p0 -metr -geopos8,47,0 -n10 -edirE:\Github\swe-jni-demo\ephe 
+-b1.1.2000 -p0 -metr -geopos8,47,0 -n10 -edire:\Github\swe-jni-demo\ephe 
 geo. long 8.000000, lat 47.000000, alt 0.000000
 mtransit  1.01.2000	  11:31:16.6    itransit  1.01.2000	  23:31:30.7
 mtransit  2.01.2000	  11:31:44.9    itransit  2.01.2000	  23:31:59.0

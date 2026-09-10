@@ -1,4 +1,4 @@
--b4.4.1000 -p0 -fPL -edirE:\Github\swe-jni-demo\ephe 
+-b4.4.1000 -p0 -fPL -edire:\Github\swe-jni-demo\ephe 
 date (dmy) 4.4.1000 jul.   0:00:00 TT		version 2.10.03
 UT:  2086401.483076641     delta t: 1462.178245 sec
 TT:  2086401.500000000

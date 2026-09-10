@@ -1,4 +1,4 @@
--p8 -dh8 -ftl -n36600 -b1.1.1500 -s5 -edirE:\Github\swe-jni-demo\ephe 
+-p8 -dh8 -ftl -n36600 -b1.1.1500 -s5 -edire:\Github\swe-jni-demo\ephe 
 date (dmy) 1.1.1500 jul.   0:00:00 TT		version 2.10.03
 UT:  2268932.496624539     delta t: 291.639848 sec
 TT:  2268932.500000000

@@ -1,4 +1,4 @@
--b1.1.2000 -lunecl -anntot -n5 -edirE:\Github\swe-jni-demo\ephe 
+-b1.1.2000 -lunecl -anntot -n5 -edire:\Github\swe-jni-demo\ephe 
 total lunar eclipse	21.01.2000	  04:43:29.8	1.3249/2.3058	saros 124/48	2451564.696873
     02:04:23.2    03:01:47.7    04:04:59.0    05:22:01.2    06:25:12.0    07:22:40.9 dt=63.8
 	 -68° 8'46"	  19°45'29"

@@ -1,4 +1,4 @@
--b1.1.2000 -lunecl -penumbral -n5 -edirE:\Github\swe-jni-demo\ephe 
+-b1.1.2000 -lunecl -penumbral -n5 -edire:\Github\swe-jni-demo\ephe 
 penumb. lunar eclipse	30.12.2001	  10:29:23.0	0.0000/0.8933	saros 144/15	2452273.937071
     08:27:32.4     -            -            -            -           12:31:09.3 dt=64.3
 	-156°44'39"	  24°12'19"

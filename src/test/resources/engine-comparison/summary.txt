@@ -1,97 +1,97 @@
 category    label                                         native ms   pure-java ms  ratio    verdict      command line
-transit     rise/set, 10 events                                1.298        50.714   39.06x  differs       -b1.1.2000 -p0 -rise -geopos8,47,0 -n10
-transit     rise/set, disc center, 10 events                   1.215        49.292   40.58x  differs       -b1.1.2000 -p0 -rise -disccenter -geopos8,47,0 -n10
-transit     rise/set, disc bottom, 10 events                   1.260        49.056   38.95x  differs       -b1.1.2000 -p0 -rise -discbottom -geopos8,47,0 -n10
-transit     rise/set, no refraction, 10 events                 1.131        33.934   30.01x  same output   -b1.1.2000 -p0 -rise -norefrac -geopos8,47,0 -n10
-transit     rise/set, hindu rising, 10 events                  0.898        33.972   37.83x  differs       -b1.1.2000 -p0 -rise -hindu -geopos8,47,0 -n10
-transit     meridian transit, 10 events                        1.247         2.490    2.00x  same output   -b1.1.2000 -p0 -metr -geopos8,47,0 -n10
-transit     lunar eclipse, 5 events                            2.984         7.457    2.50x  differs       -b1.1.2000 -lunecl -n5
-transit     lunar eclipse, penumbral, 5 events                 3.258         8.014    2.46x  differs       -b1.1.2000 -lunecl -penumbral -n5
-transit     lunar eclipse, annular-total, 5 events             2.746         8.525    3.10x  differs       -b1.1.2000 -lunecl -anntot -n5
-transit     lunar eclipse, local circumstances                 0.206         0.597    2.90x  same output   -b1.1.2000 -lunecl -how -geopos8,47,0
-transit     solar eclipse, 5 events                            5.500        14.812    2.69x  differs       -b1.1.2000 -solecl -n5
-transit     solar eclipse, total, 5 events                    17.124      3863.818  225.63x  differs       -b1.1.2000 -solecl -total -n5
-transit     solar eclipse, annular, 5 events                  13.822      3869.545  279.96x  differs       -b1.1.2000 -solecl -annular -n5
-transit     solar eclipse, partial, 5 events                   4.380      3864.811  882.44x  differs       -b1.1.2000 -solecl -partial -n5
-transit     solar eclipse, central, 5 events                1963.617      3863.106    1.97x  differs       -b1.1.2000 -solecl -central -n5
-transit     solar eclipse, noncentral, 5 events             1963.183      3868.482    1.97x  differs       -b1.1.2000 -solecl -noncentral -n5
-transit     solar eclipse, local, 5 events                    20.157        40.484    2.01x  differs       -b1.1.2000 -solecl -local -geopos8,47,0 -n5
-transit     lunar occultation of a planet, 5 events           16.820        57.754    3.43x  differs       -b1.1.2000 -p2 -occult -n5
-transit     lunar occultation of a star, 2 events              8.345        49.870    5.98x  differs       -b1.1.2000 -pf -xfSpica -occult -n2
-transit     heliacal event 1 (first visibility)                0.202         0.584    2.89x  same output   -b1.1.2000 -p1 -hev1 -geopos8,47,0
-transit     heliacal event 2 (last visibility)                 0.192         0.453    2.37x  same output   -b1.1.2000 -p1 -hev2 -geopos8,47,0
-transit     heliacal event 3 (evening first)                   5.387        15.840    2.94x  differs       -b1.1.2000 -p1 -hev3 -geopos8,47,0
-transit     heliacal event 4 (acronychal)                      5.405        14.433    2.67x  differs       -b1.1.2000 -p1 -hev4 -geopos8,47,0
-transit     heliacal event, custom flag                        0.198         0.518    2.61x  same output   -b1.1.2000 -p1 -helflag256 -hev1 -geopos8,47,0
-jhd         ref0000.jhd (0)                                    0.685         1.243    1.81x  differs       -b4.4.0 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
-jhd         ref0100.jhd (100)                                  0.623         1.195    1.92x  differs       -b4.4.100 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
-jhd         ref0500.jhd (500)                                  0.596         1.211    2.03x  differs       -b4.4.500 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
-jhd         ref1000.jhd (1000)                                 0.621         1.108    1.78x  differs       -b4.4.1000 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
-jhd         ref1500.jhd (1500)                                 0.608         1.244    2.05x  differs       -b4.4.1500 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
-jhd         ref1700.jhd (1700)                                 0.634         1.265    1.99x  differs       -b4.4.1700 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
-jhd         ref1800.jhd (1800)                                 0.507         0.836    1.65x  differs       -b4.4.1800 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
-jhd         ref1900.jhd (1900)                                 0.492         0.807    1.64x  differs       -b4.4.1900 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
-jhd         ref1970.jhd (1970)                                 0.507         0.803    1.59x  differs       -b4.4.1970 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
-jhd         ref1990.jhd (1990)                                 0.558         0.884    1.59x  differs       -b4.4.1990 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
-jhd         ref2000.jhd (2000)                                 0.636         0.844    1.33x  differs       -b4.4.2000 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
-jhd         ref2010.jhd (2010)                                 0.581         0.966    1.66x  differs       -b4.4.2010 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
-jhd         ref2030.jhd (2030)                                 0.719         0.929    1.29x  differs       -b4.4.2030 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
-jhd         ref2050.jhd (2050)                                 0.636         1.009    1.59x  differs       -b4.4.2050 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
-jhd         ref2070.jhd (2070)                                 0.565         0.971    1.72x  differs       -b4.4.2070 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
-jhd         ref2090.jhd (2090)                                 0.588         0.999    1.70x  differs       -b4.4.2090 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
-jhd         ref2100.jhd (2100)                                 0.601         0.928    1.54x  differs       -b4.4.2100 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
-example     Mercury, 15 positions, 2-day steps                 0.714         1.059    1.48x  differs       -p2 -b1.12.1900 -n15 -s2
-example     ...same, comma-sep, rounded, no header             0.527         0.723    1.37x  same output   -p2 -b1.12.1900 -n15 -s2 -fTZ -roundsec -g, -head
-example     asteroid 433 Eros                                  0.487         2.116    4.34x  differs       -ps -xs433 -b1.12.1900
-example     fixed star Aldebaran                               0.215         0.584    2.72x  differs       -pf -xfAldebaran -b1.1.2000
-example     Moon-Sun angular distance, 10 days                 0.423         0.706    1.67x  differs       -p1 -d0 -b1.12.1900 -n10 -fPTl -head
-example     Saturn-Chiron midpoints, 100x5d steps              3.141         4.283    1.36x  same output   -p6 -DD -b1.12.1900 -n100 -s5 -fPTZ -head -roundmin
-example     Koch houses for a German location                  0.388         0.630    1.62x  differs       -b5.1.2002 -p -house12.05,49.50,K -ut12:30
-example     tabular ephemeris, 366 days, one row/day          46.757        39.164    0.84x  differs       -b1.1.2016 -g -fTlbR -p0123456789Dmte -hor -n366 -roundsec
-example     Sun-Mercury differential, 366 daily steps          7.630         6.917    0.91x  differs       -p2 -d0 -fJl -n366 -b1.1.1992
-example     geo vs helio Neptune, 500y in 5y steps (n=36600)     717.580       647.273    0.90x  differs       -p8 -dh8 -ftl -n36600 -b1.1.1500 -s5
-broad       ten planets, one date/time                         0.341         0.576    1.69x  differs       -b18.4.1976 -ut20:21:00 -p0123456789
-broad       all houses + planets, PLBRS format                 0.384         0.626    1.63x  differs       -b1.1.2000 -pd -fPLBRS
-broad       tabular, comma-sep, no header                      0.298         0.492    1.66x  differs       -b1.1.2000 -p0123456789 -fTZ -g, -head
-broad       Mercury, 15 positions, 2-day steps                 0.553         0.842    1.52x  differs       -b1.12.1900 -p2 -n15 -s2
-broad       one row per day, 5 days, all planets               0.725         1.052    1.45x  differs       -b1.1.2016 -g -fTlbR -p0123456789Dmte -hor -n5 -roundsec
-broad       asteroids, main belt group                         2.259         9.374    4.15x  differs       -b1.1.2000 -pa -fPL
-broad       hypothetical/uranian bodies                        2.077         5.726    2.76x  differs       -b1.1.2000 -ph -fPL
-broad       planets + main asteroids                           0.534         3.336    6.25x  differs       -b1.1.2000 -pp -fPL
-broad       single numbered asteroid by index                  0.304         0.630    2.08x  differs       -b1.1.2000 -pz -xz1 -fPL
-broad       single numbered planetoid by index                 0.273         0.348    1.28x  differs       -b1.1.2000 -pv -xv9501 -fPL
-broad       sidereal Lahiri, true positions                    0.281         0.436    1.55x  differs       -b1.1.2000 -p0123456789 -sid1 -true -fPl
-broad       sidereal True Chitrapaksha                         0.350         0.735    2.10x  differs       -b1.1.2000 -p0123456789 -sid27 -fPl
-broad       sidereal Lahiri, one body                          0.162         0.362    2.24x  differs       -b1.1.2000 -pb -sid1 -fPl
-broad       heliocentric                                       0.166         0.357    2.15x  differs       -b1.1.2000 -p2 -hel -fPl
-broad       J2000 frame                                        0.165         0.350    2.13x  differs       -b1.1.2000 -p2 -j2000 -fPl
-broad       no nutation                                        0.156         0.339    2.18x  differs       -b1.1.2000 -p2 -nonut -fPl
-broad       position + declination + whole-sign                0.166         0.384    2.31x  differs       -b1.1.2000 -p0 -fPaDdW
-broad       position + right ascension + Uranian house         0.167         0.366    2.19x  differs       -b1.1.2000 -p0 -fPXU
-broad       differential Moon-Sun angular distance             0.171         0.359    2.10x  differs       -b1.1.2000 -p1 -d0 -fPTl
-broad       Saturn-Chiron midpoints, 5x5d steps                0.347         0.622    1.79x  differs       -b1.12.1900 -p6 -DD -n5 -s5 -fPTZ -roundmin
-broad       fixed star Aldebaran, full format                  0.182         0.408    2.24x  differs       -b1.1.2000 -pf -xfAldebaran -fPLBR
-broad       asteroid 433 Eros, full format                     0.396         1.520    3.84x  differs       -b1.1.2000 -ps -xs433 -fPLBR
-broad       barycentric                                        0.168         0.348    2.08x  differs       -b1.1.2000 -p0 -bary -fPL
-broad       topocentric                                        0.171         0.356    2.09x  differs       -b1.1.2000 -p0 -topo8,47,0 -fPL
-broad       Moshier ephemeris                                  0.039         0.346    8.88x  differs       -b1.1.2000 -p0 -emos -fPL
-broad       Swiss ephemeris (explicit)                         0.161         0.377    2.34x  differs       -b1.1.2000 -p0 -eswe -fPL
-broad       ICRS frame                                         0.205         0.452    2.20x  differs       -b1.1.2000 -p0 -icrs -fPL
-broad       no aberration                                      0.192         0.400    2.08x  differs       -b1.1.2000 -p0 -noaberr -fPL
-broad       no light deflection                                0.181         0.363    2.00x  differs       -b1.1.2000 -p0 -nodefl -fPL
-broad       with speed                                         0.180         0.373    2.07x  differs       -b1.1.2000 -p0 -speed -fPLS
-broad       without speed                                      0.185         0.389    2.10x  differs       -b1.1.2000 -p0 -nospeed -fPL
-broad       Placidus houses + G/g/j auxiliary columns          0.441         0.584    1.32x  differs       -b1.1.2000 -p0 -house8,47,P -ut12:00 -fPGgj
-broad       whole sign houses                                  0.345         0.575    1.67x  differs       -b1.1.2000 -p0 -house8,47,W -ut12:00
-broad       36 Gauquelin sectors                               0.196         0.378    1.93x  differs       -b1.1.2000 -p0 -house8,47,G -fPGgj
-broad       Meridian/axial-rotation houses                     0.197         0.381    1.94x  differs       -b1.1.2000 -p0 -hsyX -house8,47 -fPGgj
-broad       absolute julian day input                          0.160         0.353    2.20x  differs       -bj2451545.0 -p0 -fPL
-broad       ancient date, Julian calendar                      0.270         0.664    2.46x  differs       -b4.4.1000 -p0 -fPL
-broad       ancient date, proleptic Gregorian                  0.275         0.655    2.38x  differs       -b4.4.1000greg -p0 -fPL
-broad       UTC input                                          0.171         0.364    2.13x  differs       -b1.1.2000 -p0 -fPL -utc12:00:00
-broad       LMT output with geopos                             0.194         0.355    1.83x  differs       -b1.1.2000 -p0 -lmt12:00 -geopos8,47,0 -fPL
-broad       LAT output with geopos                             0.167         0.349    2.09x  differs       -b1.1.2000 -p0 -lat -geopos8,47,0 -fPL
-broad       atmospheric pressure/temperature                   0.168         0.352    2.09x  differs       -b1.1.2000 -p0 -at1013,10 -geopos8,47,0 -fPL
-broad       observer eye conditions                            0.162         0.351    2.17x  differs       -b1.1.2000 -p0 -obs30,60 -fPL
-broad       orbital elements (native only)                     0.233           n/a        -  not ported    -b1.1.2000 -p0 -orbel
-broad       planetocentric positions (native only)             0.175           n/a        -  not ported    -b1.1.2000 -p0 -pc3 -fPL
+transit     rise/set, 10 events                                1.281        54.215   42.34x  differs       -b1.1.2000 -p0 -rise -geopos8,47,0 -n10
+transit     rise/set, disc center, 10 events                   1.352        50.499   37.36x  differs       -b1.1.2000 -p0 -rise -disccenter -geopos8,47,0 -n10
+transit     rise/set, disc bottom, 10 events                   1.151        48.649   42.26x  differs       -b1.1.2000 -p0 -rise -discbottom -geopos8,47,0 -n10
+transit     rise/set, no refraction, 10 events                 1.075        33.911   31.54x  same output   -b1.1.2000 -p0 -rise -norefrac -geopos8,47,0 -n10
+transit     rise/set, hindu rising, 10 events                  0.908        34.177   37.66x  differs       -b1.1.2000 -p0 -rise -hindu -geopos8,47,0 -n10
+transit     meridian transit, 10 events                        1.236         2.485    2.01x  same output   -b1.1.2000 -p0 -metr -geopos8,47,0 -n10
+transit     lunar eclipse, 5 events                            2.592         7.122    2.75x  differs       -b1.1.2000 -lunecl -n5
+transit     lunar eclipse, penumbral, 5 events                 2.561         7.262    2.84x  differs       -b1.1.2000 -lunecl -penumbral -n5
+transit     lunar eclipse, annular-total, 5 events             2.826         8.847    3.13x  differs       -b1.1.2000 -lunecl -anntot -n5
+transit     lunar eclipse, local circumstances                 0.170         0.457    2.69x  same output   -b1.1.2000 -lunecl -how -geopos8,47,0
+transit     solar eclipse, 5 events                            4.909        13.661    2.78x  differs       -b1.1.2000 -solecl -n5
+transit     solar eclipse, total, 5 events                    17.017      3864.961  227.12x  differs       -b1.1.2000 -solecl -total -n5
+transit     solar eclipse, annular, 5 events                  14.054      4018.537  285.94x  differs       -b1.1.2000 -solecl -annular -n5
+transit     solar eclipse, partial, 5 events                   4.387      3899.123  888.77x  differs       -b1.1.2000 -solecl -partial -n5
+transit     solar eclipse, central, 5 events                1972.216      3865.300    1.96x  differs       -b1.1.2000 -solecl -central -n5
+transit     solar eclipse, noncentral, 5 events             1970.093      3870.607    1.96x  differs       -b1.1.2000 -solecl -noncentral -n5
+transit     solar eclipse, local, 5 events                    20.036        41.145    2.05x  differs       -b1.1.2000 -solecl -local -geopos8,47,0 -n5
+transit     lunar occultation of a planet, 5 events           16.851        57.705    3.42x  differs       -b1.1.2000 -p2 -occult -n5
+transit     lunar occultation of a star, 2 events              8.375        39.739    4.74x  differs       -b1.1.2000 -pf -xfSpica -occult -n2
+transit     heliacal event 1 (first visibility)                0.217         0.589    2.71x  same output   -b1.1.2000 -p1 -hev1 -geopos8,47,0
+transit     heliacal event 2 (last visibility)                 0.218         0.502    2.31x  same output   -b1.1.2000 -p1 -hev2 -geopos8,47,0
+transit     heliacal event 3 (evening first)                   6.795        17.292    2.54x  differs       -b1.1.2000 -p1 -hev3 -geopos8,47,0
+transit     heliacal event 4 (acronychal)                      5.776        13.894    2.41x  differs       -b1.1.2000 -p1 -hev4 -geopos8,47,0
+transit     heliacal event, custom flag                        0.167         0.408    2.44x  same output   -b1.1.2000 -p1 -helflag256 -hev1 -geopos8,47,0
+jhd         ref0000.jhd (0)                                    0.714         1.327    1.86x  differs       -b4.4.0 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
+jhd         ref0100.jhd (100)                                  0.655         1.456    2.22x  differs       -b4.4.100 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
+jhd         ref0500.jhd (500)                                  0.596         1.146    1.92x  differs       -b4.4.500 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
+jhd         ref1000.jhd (1000)                                 0.637         1.087    1.71x  differs       -b4.4.1000 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
+jhd         ref1500.jhd (1500)                                 0.659         1.277    1.94x  differs       -b4.4.1500 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
+jhd         ref1700.jhd (1700)                                 0.658         1.566    2.38x  differs       -b4.4.1700 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
+jhd         ref1800.jhd (1800)                                 0.649         1.050    1.62x  differs       -b4.4.1800 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
+jhd         ref1900.jhd (1900)                                 0.642         0.880    1.37x  differs       -b4.4.1900 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
+jhd         ref1970.jhd (1970)                                 0.548         0.816    1.49x  differs       -b4.4.1970 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
+jhd         ref1990.jhd (1990)                                 0.533         0.837    1.57x  differs       -b4.4.1990 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
+jhd         ref2000.jhd (2000)                                 0.577         0.892    1.54x  differs       -b4.4.2000 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
+jhd         ref2010.jhd (2010)                                 0.497         0.936    1.88x  differs       -b4.4.2010 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
+jhd         ref2030.jhd (2030)                                 0.689         1.102    1.60x  differs       -b4.4.2030 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
+jhd         ref2050.jhd (2050)                                 0.562         0.966    1.72x  differs       -b4.4.2050 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
+jhd         ref2070.jhd (2070)                                 0.589         1.106    1.88x  differs       -b4.4.2070 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
+jhd         ref2090.jhd (2090)                                 0.586         0.984    1.68x  differs       -b4.4.2090 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
+jhd         ref2100.jhd (2100)                                 0.576         0.959    1.67x  differs       -b4.4.2100 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl
+example     Mercury, 15 positions, 2-day steps                 0.726         1.144    1.58x  differs       -p2 -b1.12.1900 -n15 -s2
+example     ...same, comma-sep, rounded, no header             0.548         0.803    1.47x  same output   -p2 -b1.12.1900 -n15 -s2 -fTZ -roundsec -g, -head
+example     asteroid 433 Eros                                  0.533         2.619    4.91x  differs       -ps -xs433 -b1.12.1900
+example     fixed star Aldebaran                               0.292         0.524    1.79x  differs       -pf -xfAldebaran -b1.1.2000
+example     Moon-Sun angular distance, 10 days                 0.568         0.721    1.27x  differs       -p1 -d0 -b1.12.1900 -n10 -fPTl -head
+example     Saturn-Chiron midpoints, 100x5d steps              3.326         5.831    1.75x  same output   -p6 -DD -b1.12.1900 -n100 -s5 -fPTZ -head -roundmin
+example     Koch houses for a German location                  0.411         0.721    1.76x  differs       -b5.1.2002 -p -house12.05,49.50,K -ut12:30
+example     tabular ephemeris, 366 days, one row/day          44.398        40.461    0.91x  differs       -b1.1.2016 -g -fTlbR -p0123456789Dmte -hor -n366 -roundsec
+example     Sun-Mercury differential, 366 daily steps          7.631         7.269    0.95x  differs       -p2 -d0 -fJl -n366 -b1.1.1992
+example     geo vs helio Neptune, 500y in 5y steps (n=36600)     715.983       648.163    0.91x  differs       -p8 -dh8 -ftl -n36600 -b1.1.1500 -s5
+broad       ten planets, one date/time                         0.342         0.586    1.71x  differs       -b18.4.1976 -ut20:21:00 -p0123456789
+broad       all houses + planets, PLBRS format                 0.391         0.678    1.74x  differs       -b1.1.2000 -pd -fPLBRS
+broad       tabular, comma-sep, no header                      0.251         0.465    1.85x  differs       -b1.1.2000 -p0123456789 -fTZ -g, -head
+broad       Mercury, 15 positions, 2-day steps                 0.569         0.877    1.54x  differs       -b1.12.1900 -p2 -n15 -s2
+broad       one row per day, 5 days, all planets               0.726         1.136    1.56x  differs       -b1.1.2016 -g -fTlbR -p0123456789Dmte -hor -n5 -roundsec
+broad       asteroids, main belt group                         2.311         8.911    3.86x  differs       -b1.1.2000 -pa -fPL
+broad       hypothetical/uranian bodies                        1.980         5.806    2.93x  differs       -b1.1.2000 -ph -fPL
+broad       planets + main asteroids                           0.530         1.023    1.93x  differs       -b1.1.2000 -pp -fPL
+broad       single numbered asteroid by index                  0.257         0.637    2.48x  differs       -b1.1.2000 -pz -xz1 -fPL
+broad       single numbered planetoid by index                 0.315         0.357    1.13x  differs       -b1.1.2000 -pv -xv9501 -fPL
+broad       sidereal Lahiri, true positions                    0.281         0.455    1.62x  differs       -b1.1.2000 -p0123456789 -sid1 -true -fPl
+broad       sidereal True Chitrapaksha                         0.356         0.846    2.38x  differs       -b1.1.2000 -p0123456789 -sid27 -fPl
+broad       sidereal Lahiri, one body                          0.165         0.392    2.38x  differs       -b1.1.2000 -pb -sid1 -fPl
+broad       heliocentric                                       0.173         0.370    2.14x  differs       -b1.1.2000 -p2 -hel -fPl
+broad       J2000 frame                                        0.169         0.410    2.43x  differs       -b1.1.2000 -p2 -j2000 -fPl
+broad       no nutation                                        0.159         0.352    2.22x  differs       -b1.1.2000 -p2 -nonut -fPl
+broad       position + declination + whole-sign                0.183         0.374    2.04x  differs       -b1.1.2000 -p0 -fPaDdW
+broad       position + right ascension + Uranian house         0.172         0.371    2.15x  differs       -b1.1.2000 -p0 -fPXU
+broad       differential Moon-Sun angular distance             0.175         0.368    2.11x  differs       -b1.1.2000 -p1 -d0 -fPTl
+broad       Saturn-Chiron midpoints, 5x5d steps                0.415         0.641    1.54x  differs       -b1.12.1900 -p6 -DD -n5 -s5 -fPTZ -roundmin
+broad       fixed star Aldebaran, full format                  0.184         0.417    2.27x  differs       -b1.1.2000 -pf -xfAldebaran -fPLBR
+broad       asteroid 433 Eros, full format                     0.407         1.593    3.92x  differs       -b1.1.2000 -ps -xs433 -fPLBR
+broad       barycentric                                        0.163         0.353    2.16x  differs       -b1.1.2000 -p0 -bary -fPL
+broad       topocentric                                        0.176         0.365    2.08x  differs       -b1.1.2000 -p0 -topo8,47,0 -fPL
+broad       Moshier ephemeris                                  0.040         0.354    8.93x  differs       -b1.1.2000 -p0 -emos -fPL
+broad       Swiss ephemeris (explicit)                         0.164         0.364    2.22x  differs       -b1.1.2000 -p0 -eswe -fPL
+broad       ICRS frame                                         0.170         0.363    2.14x  differs       -b1.1.2000 -p0 -icrs -fPL
+broad       no aberration                                      0.165         0.355    2.15x  differs       -b1.1.2000 -p0 -noaberr -fPL
+broad       no light deflection                                0.165         0.375    2.27x  differs       -b1.1.2000 -p0 -nodefl -fPL
+broad       with speed                                         0.186         0.393    2.12x  differs       -b1.1.2000 -p0 -speed -fPLS
+broad       without speed                                      0.250         0.378    1.51x  differs       -b1.1.2000 -p0 -nospeed -fPL
+broad       Placidus houses + G/g/j auxiliary columns          0.428         0.590    1.38x  differs       -b1.1.2000 -p0 -house8,47,P -ut12:00 -fPGgj
+broad       whole sign houses                                  0.344         0.572    1.66x  differs       -b1.1.2000 -p0 -house8,47,W -ut12:00
+broad       36 Gauquelin sectors                               0.194         0.379    1.95x  differs       -b1.1.2000 -p0 -house8,47,G -fPGgj
+broad       Meridian/axial-rotation houses                     0.183         0.379    2.08x  differs       -b1.1.2000 -p0 -hsyX -house8,47 -fPGgj
+broad       absolute julian day input                          0.232         0.393    1.70x  differs       -bj2451545.0 -p0 -fPL
+broad       ancient date, Julian calendar                      0.278         0.647    2.33x  differs       -b4.4.1000 -p0 -fPL
+broad       ancient date, proleptic Gregorian                  0.273         0.658    2.41x  differs       -b4.4.1000greg -p0 -fPL
+broad       UTC input                                          0.180         0.363    2.01x  differs       -b1.1.2000 -p0 -fPL -utc12:00:00
+broad       LMT output with geopos                             0.177         0.366    2.07x  differs       -b1.1.2000 -p0 -lmt12:00 -geopos8,47,0 -fPL
+broad       LAT output with geopos                             0.170         0.365    2.14x  differs       -b1.1.2000 -p0 -lat -geopos8,47,0 -fPL
+broad       atmospheric pressure/temperature                   0.213         0.360    1.69x  differs       -b1.1.2000 -p0 -at1013,10 -geopos8,47,0 -fPL
+broad       observer eye conditions                            0.208         0.356    1.72x  differs       -b1.1.2000 -p0 -obs30,60 -fPL
+broad       orbital elements (native only)                     0.181           n/a        -  not ported    -b1.1.2000 -p0 -orbel
+broad       planetocentric positions (native only)             0.172           n/a        -  not ported    -b1.1.2000 -p0 -pc3 -fPL

@@ -1,4 +1,4 @@
--b1.1.2000 -solecl -local -geopos8,47,0 -n5 -edirE:\Github\swe-jni-demo\ephe 
+-b1.1.2000 -solecl -local -geopos8,47,0 -n5 -edire:\Github\swe-jni-demo\ephe 
 geo. long 8.000000, lat 47.000000, alt 0.000000
 partial 31.05.2003	  03:41:16.1	0.6458/0.6458/0.5468	saros 147/22	2452790.653658
 	0 min 0.00 sec	   -            -            -           04:20:23.5  dt=64.5

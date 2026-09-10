@@ -1,4 +1,4 @@
--b1.1.2000 -p0 -rise -hindu -geopos8,47,0 -n10 -edirE:\Github\swe-jni-demo\ephe 
+-b1.1.2000 -p0 -rise -hindu -geopos8,47,0 -n10 -edire:\Github\swe-jni-demo\ephe 
 geo. long 8.000000, lat 47.000000, alt 0.000000
 rise      1.01.2000	  07:19:46.5    set       1.01.2000	  15:42:56.0    dt =  08:23:09.5
 rise      2.01.2000	  07:19:47.1    set       2.01.2000	  15:43:53.1    dt =  08:24:06.1

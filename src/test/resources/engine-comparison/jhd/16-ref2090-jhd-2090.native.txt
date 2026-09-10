@@ -1,4 +1,4 @@
--b4.4.2090 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl -edirE:\Github\swe-jni-demo\ephe 
+-b4.4.2090 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl -edire:\Github\swe-jni-demo\ephe 
 date (dmy) 4.4.2090 greg.   12:20:40 UT		version 2.10.03
 UT:  2484511.014351852     delta t: 88.863628 sec
 TT:  2484511.015380366   ayanamsa =   25° 7' 4.3231 (Lahiri)

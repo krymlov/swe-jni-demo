@@ -1,4 +1,4 @@
--b1.1.2000 -solecl -total -n5 -edirE:\Github\swe-jni-demo\ephe 
+-b1.1.2000 -solecl -total -n5 -edire:\Github\swe-jni-demo\ephe 
 total solar	21.06.2001	  12: 3:41.4	-167.342570 km	1.0504/1.0251/1.1034	saros 127/57	2452082.002563
 	  09:33:07.8    10:36:00.3    13:31:31.4    14:34:19.0 dt=64.2
 	   2°44'39"	 -11°15'30"	4 min 56.56 sec

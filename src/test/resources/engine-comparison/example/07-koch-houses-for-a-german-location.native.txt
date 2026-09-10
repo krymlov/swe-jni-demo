@@ -1,4 +1,4 @@
--b5.1.2002 -p -house12.05,49.50,K -ut12:30 -edirE:\Github\swe-jni-demo\ephe 
+-b5.1.2002 -p -house12.05,49.50,K -ut12:30 -edire:\Github\swe-jni-demo\ephe 
 date (dmy) 5.1.2002 greg.   12:30:00 UT		version 2.10.03
 UT:  2452280.020833333     delta t: 64.302553 sec
 TT:  2452280.021577576

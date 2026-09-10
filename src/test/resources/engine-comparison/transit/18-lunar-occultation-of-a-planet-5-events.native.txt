@@ -1,4 +1,4 @@
--b1.1.2000 -p2 -occult -n5 -edirE:\Github\swe-jni-demo\ephe 
+-b1.1.2000 -p2 -occult -n5 -edire:\Github\swe-jni-demo\ephe 
 total   29.07.2000	  17:11:49.1	-3472.714134 km	140.033079	2451755.216541
 	  15:29:01.2    15:29:17.3    18:54:27.9    18:54:44.0 dt=64.0
 	 -88°47'	  74°50'	64 min 31.29 sec

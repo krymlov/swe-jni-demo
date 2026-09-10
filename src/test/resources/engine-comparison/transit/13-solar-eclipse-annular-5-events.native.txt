@@ -1,4 +1,4 @@
--b1.1.2000 -solecl -annular -n5 -edirE:\Github\swe-jni-demo\ephe 
+-b1.1.2000 -solecl -annular -n5 -edire:\Github\swe-jni-demo\ephe 
 annular solar	14.12.2001	  20:51:57.3	111.799122 km	0.9689/0.9845/0.9388	saros 132/45	2452258.369414
 	  18:03:27.4    19:08:15.7    22:35:50.2    23:40:42.1 dt=64.3
 	-130°42' 6"	   0°38' 6"	3 min 52.92 sec

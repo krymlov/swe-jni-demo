@@ -1,4 +1,4 @@
--b18.4.1976 -ut20:21:00 -p0123456789 -edirE:\Github\swe-jni-demo\ephe 
+-b18.4.1976 -ut20:21:00 -p0123456789 -edire:\Github\swe-jni-demo\ephe 
 date (dmy) 18.4.1976 greg.   20:21:00 UT		version 2.10.03
 UT:  2442887.347916667     delta t: 46.771291 sec
 TT:  2442887.348458001

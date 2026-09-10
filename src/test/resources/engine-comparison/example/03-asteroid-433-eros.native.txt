@@ -1,8 +1,8 @@
--ps -xs433 -b1.12.1900 -edirE:\Github\swe-jni-demo\ephe 
+-ps -xs433 -b1.12.1900 -edire:\Github\swe-jni-demo\ephe 
 date (dmy) 1.12.1900 greg.   0:00:00 TT		version 2.10.03
 UT:  2415354.500010080     delta t: -0.870916 sec
 TT:  2415354.500000000
 Epsilon (t/m)     23°27' 3.1432   23°27' 7.8117
 Nutation           0° 0'14.2416   -0° 0' 4.6686
-error: SwissEph file 'se00433s.se1' not found in PATH 'E:\Github\swe-jni-demo\ephe\'
+error: SwissEph file 'se00433s.se1' not found in PATH 'e:\Github\swe-jni-demo\ephe\'
 433: not found (asteroid)    0° 0' 0.0000    0° 0' 0.0000    0.000000000    0° 0' 0.0000

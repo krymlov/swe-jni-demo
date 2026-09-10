@@ -1,4 +1,4 @@
--p2 -d0 -fJl -n366 -b1.1.1992 -edirE:\Github\swe-jni-demo\ephe 
+-p2 -d0 -fJl -n366 -b1.1.1992 -edire:\Github\swe-jni-demo\ephe 
 date (dmy) 1.1.1992 greg.   0:00:00 TT		version 2.10.03
 UT:  2448622.499325125     delta t: 58.309199 sec
 TT:  2448622.500000000

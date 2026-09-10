@@ -1,4 +1,4 @@
--b1.12.1900 -p6 -DD -n5 -s5 -fPTZ -roundmin -edirE:\Github\swe-jni-demo\ephe 
+-b1.12.1900 -p6 -DD -n5 -s5 -fPTZ -roundmin -edire:\Github\swe-jni-demo\ephe 
 date (dmy) 1.12.1900 greg.   0:00:00 TT		version 2.10.03
 UT:  2415354.500010080     delta t: -0.870916 sec
 TT:  2415354.500000000
