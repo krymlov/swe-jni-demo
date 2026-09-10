@@ -1,0 +1,1 @@
+NotImplementedException: swe_calc_pctr: planetocentric positions need the light time and aberration between two moving bodies, which this port has no path for; use the native library

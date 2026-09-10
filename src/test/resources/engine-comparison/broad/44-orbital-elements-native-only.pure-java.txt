@@ -1,0 +1,1 @@
+NotImplementedException: swe_get_orbital_elements: osculating orbital elements are not ported - 17 documented return values derived from the heliocentric state vector; use org.swisseph.SwephNative

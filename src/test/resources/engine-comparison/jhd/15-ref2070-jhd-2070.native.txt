@@ -1,0 +1,39 @@
+-b4.4.2070 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl -edirE:\Github\swe-jni-demo\ephe 
+date (dmy) 4.4.2070 greg.   12:20:40 UT		version 2.10.03
+UT:  2477206.014351852     delta t: 81.099528 sec
+TT:  2477206.015290504   ayanamsa =   24°50'26.4494 (Lahiri)
+geo. long 81.133333, lat 16.166667, alt 0.000000
+Epsilon (m)       23°25'48.5010
+Houses system P (Placidus) for long=  81° 7'59.9988, lat=  16°10' 0.0012
+Sun              350.2416682
+Moon             267.2712392
+Mercury           3.3682260
+Venus            305.7839497
+Mars             67.7866333
+Jupiter          343.1489773
+Saturn           171.3982049
+Uranus           238.6590186
+Neptune          73.4082316
+Pluto            338.3467550
+mean Node        181.3595285
+true Node        180.7786215
+house  1         164.3228892
+house  2         194.1551161
+house  3         224.1197666
+house  4         253.8641488
+house  5         284.0107575
+house  6         314.6255566
+house  7         344.3228892
+house  8         14.1551161
+house  9         44.1197666
+house 10         73.8641488
+house 11         104.0107575
+house 12         134.6255566
+Ascendant        164.3228892
+MC               73.8641488
+ARMC             99.4733172
+Vertex           315.7243033
+equat. Asc.      165.4662622
+co-Asc. W.Koch   166.9310526
+co-Asc Munkasey  159.2944364
+Polar Asc.       346.9310526

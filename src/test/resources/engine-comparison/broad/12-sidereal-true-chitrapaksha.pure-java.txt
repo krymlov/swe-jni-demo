@@ -1,0 +1,15 @@
+-b1.1.2000 -p0123456789 -sid27 -fPl -edirE:\Github\swe-jni-demo\ephe 
+date (dmy) 1.1.2000 greg.   0:00:00 TT		version 2.01.00
+UT:  2451544.499261249     delta t: 63.828083 sec
+TT:  2451544.500000000   ayanamsa =   23°50' 9.8871 (True Citra)
+Epsilon (m)       23°26'21.4066
+Sun              256.0223817
+Moon             193.4482638
+Mercury          247.2745791
+Venus            217.1244382
+Mars             303.7388169
+Jupiter           1.3970213
+Saturn           16.5698000
+Uranus           290.9479540
+Neptune          279.3391480
+Pluto            227.6010639

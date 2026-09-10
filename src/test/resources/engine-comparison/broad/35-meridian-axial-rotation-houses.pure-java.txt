@@ -1,0 +1,9 @@
+-b1.1.2000 -p0 -hsyX -house8,47 -fPGgj -edirE:\Github\swe-jni-demo\ephe 
+date (dmy) 1.1.2000 greg.   0:00:00 TT		version 2.01.00
+UT:  2451544.499261249     delta t: 63.828083 sec
+TT:  2451544.500000000
+geo. long 8.000000, lat 47.000000, alt 0.000000
+Epsilon (t/m)     23°26'15.6467   23°26'21.4066
+Nutation          -0° 0'13.9311   -0° 0' 5.7600
+option -house requires option -ut for Universal Time
+Sun               83° 1'39.5848  83.0276624   3.7675887

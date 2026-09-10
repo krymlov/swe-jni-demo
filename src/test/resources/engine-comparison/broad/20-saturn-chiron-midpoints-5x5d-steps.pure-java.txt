@@ -1,0 +1,11 @@
+-b1.12.1900 -p6 -DD -n5 -s5 -fPTZ -roundmin -edirE:\Github\swe-jni-demo\ephe 
+date (dmy) 1.12.1900 greg.   0:00:00 TT		version 2.01.00
+UT:  2415354.500010080     delta t: -0.870916 sec
+TT:  2415354.500000000
+Epsilon (t/m)     23°27'   23°27'
+Nutation           0° 0'   -0° 0'
+Sat/Chi 01.12.1900 29 sa 44
+Sat/Chi 06.12.1900  0 cp 17
+Sat/Chi 11.12.1900  0 cp 50
+Sat/Chi 16.12.1900  1 cp 24
+Sat/Chi 21.12.1900  1 cp 58

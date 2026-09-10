@@ -1,0 +1,28 @@
+-b1.1.2000 -pp -fPL -edirE:\Github\swe-jni-demo\ephe 
+date (dmy) 1.1.2000 greg.   0:00:00 TT		version 2.01.00
+UT:  2451544.499261249     delta t: 63.828083 sec
+TT:  2451544.500000000
+Epsilon (t/m)     23°26'15.6467   23°26'21.4066
+Nutation          -0° 0'13.9311   -0° 0' 5.7600
+Sun              279°51'30.4613
+Moon             217°17' 3.6368
+Mercury          271° 6'38.3721
+Venus            240°57'37.8648
+Mars             327°34'29.6281
+Jupiter           25°13'59.1639
+Saturn            40°24'21.1670
+Uranus           314°47' 2.5215
+Neptune          303°10'30.8201
+Pluto            251°26'13.7171
+mean Node        125° 4' 1.7839
+true Node        123°58'47.2830
+mean Apogee      263°24'30.9142
+osc. Apogee      252°13'56.2381
+intp. Apogee     259°10'22.9900
+intp. Perigee     91°36'49.2117
+Chiron           251°33'37.0935
+Pholus           215°28' 1.6444
+Ceres            184°20'32.7207
+Pallas           134° 8'22.6651
+Juno             277°48'34.7424
+Vesta            245°42'41.1675

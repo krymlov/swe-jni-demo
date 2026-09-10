@@ -1,0 +1,2 @@
+-b1.1.2000 -solecl -central -n5 -edirE:\Github\swe-jni-demo\ephe 
+SwissEph file 'sepl_54.se1' not found in the paths of: 'E', '\Github\swe-jni-demo\ephe', 

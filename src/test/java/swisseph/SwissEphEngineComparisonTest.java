@@ -28,14 +28,14 @@ import static org.junit.jupiter.api.Assertions.fail;
  * that differs is which engine the {@code sw} field points at.
  *
  * <p>The two are close, not identical - {@code swe-java-lib}'s own knowledge base (see
- * {@code CLAUDE.md}) already documents why for the pieces that matter here: the pure-Java engine
- * is Swiss Ephemeris 2.01.00 rather than 2.10.03, and its fixed-star catalog is the 2.01 data,
- * so a star-derived ayanamsa (True Chitrapaksha) disagrees by several arcseconds while every
- * arithmetic ayanamsa (Lahiri and the rest) agrees to a small fraction of one. <b>1 arcsecond</b>
- * is the line this class draws for a position and <b>1 second</b> for a printed clock time
- * (rise/set, meridian transit, an eclipse's contact times) - generous enough that only a real
- * regression should cross it, tight enough that "close" cannot quietly become "wrong". Every
- * threshold below is grounded in an actual measurement, not assumed - see the comment on each.
+ * {@code CLAUDE.md}) documents the details. <b>1 arcsecond</b> is the line this class draws for a
+ * position and <b>1 second</b> for a printed clock time (rise/set, meridian transit, an eclipse's
+ * contact times) - generous enough that only a real regression should cross it, tight enough that
+ * "close" cannot quietly become "wrong". Every threshold below is grounded in an actual
+ * measurement, not assumed - see the comment on each. Three bugs this class first surfaced as
+ * "known differences" (True Chitrapaksha's ayanamsa, Koch's MC through {@code swe_house_pos()}'s
+ * auxiliary columns, and whole sign's house-cusp speed column) have since been root-caused and
+ * fixed in {@code swe-java-lib}, and now assert agreement like everything else.
  *
  * <p>Three things the pure-Java engine cannot do at all are exercised as such rather than
  * skipped: {@code -orbel} and planetocentric positions (see
@@ -186,26 +186,21 @@ public class SwissEphEngineComparisonTest {
     }
 
     /**
-     * True Chitrapaksha is the one sidereal mode this class expects to fail the 1" bar, and says
-     * so rather than excluding it. Its ayanamsa is derived from Spica's own computed longitude,
-     * and the two engines carry different star data for Spica (2.10.03's catalog vs the pure-Java
-     * port's 2.01.00 one) - so the gap is in the <i>catalog</i>, not in either engine's arithmetic,
-     * and it moves every sidereal longitude built from that ayanamsa by the same amount. Measured
-     * at this epoch: 4.8412" on the ayanamsa itself, and the same 4.8412" (to the last printed
-     * digit) on the Sun, the Moon, every planet and both lunar nodes - one root cause, reported
-     * once. Asserted with headroom on both sides: it must exceed 1" (a regression toward "equal"
-     * would mean the catalog gap silently vanished and this comment is wrong) and stay under 30"
-     * (a jump that large would mean something other than the known catalog gap is now involved).
+     * True Chitrapaksha's ayanamsa is derived from Spica's own computed longitude via
+     * {@code swe_fixstar()}, which the two engines already agree on almost to the bit
+     * ({@code swe_fixstar(..., SEFLG_TRUEPOS, ...)} measured 2e-10" apart) - so once fixed this is
+     * no different from Lahiri above, and is asserted the same way. It was not always this way:
+     * with {@code -true} (swetest's {@code SEFLG_TRUEPOS}) this used to disagree by 4.8412" on the
+     * ayanamsa and every sidereal longitude built from it, which read as a star-catalog version
+     * gap (2.10.03 vs the port's 2.01.00 data) until traced further - {@code swisseph.SwissEph}'s
+     * {@code swe_get_ayanamsa_ex()} simply never threaded {@code SEFLG_TRUEPOS} through to its own
+     * {@code swe_fixstar()} call, so a {@code -true} request silently still got the apparent-
+     * position ayanamsa. Fixed in {@code swe-java-lib}'s {@code SwissEph.swe_get_ayanamsa_ex()}.
+     * Measured after the fix: 0.0000".
      */
     @Test
-    void trueChitrapakshaAyanamsaDiffersByTheStarCatalogGap_knownDifference() {
-        final String commandLine = "-b1.1.2000 -p0123456789mt -sid27 -true -fPl -ut12:00";
-        final String n = run(nativeEph, commandLine);
-        final String p = run(pureJavaEph, commandLine);
-        final double worst = max(arcsecondDiffs(n, p));
-        assertTrue(worst > 1.0 && worst < 30.0, () -> String.format(Locale.ROOT,
-                "expected the known ~5\" star-catalog gap (1\" < diff < 30\"), measured %.4f\"%n"
-                        + "native:%n%s%npure java:%n%s", worst, n, p));
+    void trueChitrapakshaAyanamsaAgreesWithinOneArcsecond() {
+        assertPositionsAgree("-b1.1.2000 -p0123456789mt -sid27 -true -fPl -ut12:00", 1.0);
     }
 
     /**
@@ -233,55 +228,54 @@ public class SwissEphEngineComparisonTest {
     }
 
     /**
-     * The whole-sign cusp <i>speed</i> column ({@code -fPLS}) is where the two engines genuinely
-     * part ways, and {@code swe-java-lib}'s own {@code CLAUDE.md} already explains why: "the speed
-     * the native library reports is not the derivative of the cusp positions the native library
-     * itself returns... The port produces [the derivative], i.e. it is self-consistent." Whole
-     * sign makes this visible on almost every house at once, because eight of its twelve "cusps"
-     * are static sign boundaries with no astronomical body behind them at all - the port reports
-     * every one of the twelve as rotating at exactly the ascendant's own rate (they are rigidly
-     * locked together, all twelve moving in lockstep with the ascendant itself), while the
-     * native library differences each cusp's own position independently and gets a genuinely
-     * different rate for most of them.
+     * The whole-sign cusp <i>speed</i> column ({@code -fPLS}) used to disagree structurally: the
+     * pure-Java engine differenced every cusp's own position (self-consistent, but not what
+     * native reports for a snapped system), while native's {@code CalcH} (swehouse.c) never
+     * differentiates whole sign's cusps at all - its {@code case 'W'} sets no speed of its own,
+     * so eight of the twelve cusps (2, 3, 5, 6, 8, 9, 11, 12) keep a plain 0, and only 1/4/7/10
+     * carry the ascendant's or MC's own rate (1 and 7 from the ordinary pre-switch default, 4 and
+     * 10 by inheriting it through the generic opposite-cusp mirror every non-Gauquelin system
+     * gets). Fixed in {@code swe-java-lib}'s {@code SweHouse.differentiate()} to reproduce that
+     * exactly rather than approximate it by central differencing.
      *
-     * <p>Measured: only the ascendant/descendant pair (houses 1 and 7 - the one pair whose speed
-     * is unambiguous, since they are the same rotating point 180° apart) agree closely, 6" to
-     * 12". Every other house - 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, MC and IC included - differs by
-     * tens to hundreds of degrees, not arcseconds: the eight sign-boundary "cusps" because the
-     * port ties them to the ascendant's rate and the native library reports them near zero, and
-     * the MC/IC pair (4 and 10) because the divergence follows them too, not just the boundaries.
-     * Both figures are asserted, so a change in either shape - the near-agreement at 1/7 or the
-     * large gap everywhere else - shows up as a failure here rather than silently.
+     * <p>Measured after the fix: the eight sign-boundary cusps (2, 3, 5, 6, 8, 9, 11, 12) are
+     * 0.0000" in both engines - the structural gap this test used to document is gone. The
+     * ascendant/MC pair and their opposites (1, 4, 7, 10) still carry the same small
+     * engine-to-engine noise the ascendant/descendant speed already has elsewhere in this class
+     * (differencing a position over a one-second interval amplifies the two engines' ordinary
+     * sub-arcsecond position disagreement) - measured 12.17" on 1/7, 6.56" on 4/10, well inside
+     * the 20" this asserts.
      */
     @Test
-    void wholeSignHouseCuspSpeedsDisagreeStructurally_knownDifference() {
+    void wholeSignHouseCuspSpeedsAgreeWithinTwentyArcseconds() {
         final String commandLine = "-b1.1.2000 -p0 -house8,47,W -ut12:00 -fPLS";
         final String n = run(nativeEph, commandLine);
         final String p = run(pureJavaEph, commandLine);
         final String[] ln = n.split("\n", -1), lp = p.split("\n", -1);
 
-        double worstAscDesc = 0, leastOther = Double.POSITIVE_INFINITY;
-        int ascDescRows = 0, otherRows = 0;
+        double worstBoundary = 0, worstAscMc = 0;
+        int boundaryRows = 0, ascMcRows = 0;
         for (int i = 0; i < Math.min(ln.length, lp.length); i++) {
             final java.util.regex.Matcher house = Pattern.compile("^house\\s+(\\d+)").matcher(ln[i]);
             if (!house.find()) continue;
             final int hn = Integer.parseInt(house.group(1));
             final Matcher ma = DMS.matcher(ln[i]), mb = DMS.matcher(lp[i]);
             assertTrue(ma.find() && mb.find(), "cusp longitude"); // token 1: the cusp itself
-            final boolean ascDesc = hn == 1 || hn == 7;
-            if (!(ma.find() && mb.find())) fail("house " + hn + " is missing its speed column");
+            if (!(ma.find() && mb.find())) fail("house row is missing its speed column: " + ln[i]);
             final double diff = circularArcsecDiff(toDegrees(ma), toDegrees(mb));
-            if (ascDesc) { worstAscDesc = Math.max(worstAscDesc, diff); ascDescRows++; }
-            else { leastOther = Math.min(leastOther, diff); otherRows++; }
+            final boolean ascMc = hn == 1 || hn == 4 || hn == 7 || hn == 10;
+            if (ascMc) { worstAscMc = Math.max(worstAscMc, diff); ascMcRows++; }
+            else { worstBoundary = Math.max(worstBoundary, diff); boundaryRows++; }
         }
-        assertEquals(2, ascDescRows, "expected exactly 2 ascendant/descendant houses (1, 7)");
-        assertEquals(10, otherRows, "expected exactly 10 other houses (2,3,4,5,6,8,9,10,11,12)");
-        final double finalWorstAscDesc = worstAscDesc, finalLeastOther = leastOther;
-        assertTrue(worstAscDesc < 30.0, () -> "ascendant/descendant speed diff grew past the "
-                + "known 6\"-12\" gap: " + finalWorstAscDesc + "\"");
-        assertTrue(leastOther > 100.0, () -> "the other ten houses' speed diff shrank well "
-                + "below the known tens-of-degrees structural gap: " + finalLeastOther + "\" - "
-                + "the self-consistency difference this test documents may have been fixed upstream");
+        assertEquals(4, ascMcRows, "expected exactly 4 ascendant/MC houses (1, 4, 7, 10)");
+        assertEquals(8, boundaryRows, "expected exactly 8 sign-boundary houses");
+        final double finalWorstBoundary = worstBoundary, finalWorstAscMc = worstAscMc;
+        assertTrue(worstBoundary < 0.001, () -> String.format(Locale.ROOT,
+                "expected the eight sign-boundary cusps to agree exactly, measured %.4f\"%n"
+                        + "native:%n%s%npure java:%n%s", finalWorstBoundary, n, p));
+        assertTrue(worstAscMc < 20.0, () -> String.format(Locale.ROOT,
+                "expected the ascendant/MC cusps to agree within 20\", measured %.4f\"%n"
+                        + "native:%n%s%npure java:%n%s", finalWorstAscMc, n, p));
     }
 
     /**
@@ -289,18 +283,20 @@ public class SwissEphEngineComparisonTest {
      * in the breadth sweep below, and the Ascendant's G/g column right beside this one) agrees to
      * six decimal places between the two engines - Koch is not a general special case here. The
      * {@code G}/{@code g} columns are a different quantity: {@code swe_house_pos()}'s own
-     * placement of that point among the Koch cusps, i.e. the same family of
-     * {@code swe_house_pos()} self-consistency question the whole sign speed test above asks,
-     * this time for Koch's MC row (house 10 shows the identical gap, being the same point) rather
-     * than for whole sign's non-angular cusps. Measured: MC disagrees by exactly <b>60°</b>
-     * (216000.0000", to the last printed digit) - a round number, which reads as a discrete
-     * difference in which reference point the two engines measure the position from rather than
-     * as numerical noise. Placidus, Campanus, Regiomontanus and Equal all agree on the same
-     * columns to a small fraction of an arcsecond (see the breadth sweep), and Koch's own
-     * Ascendant row agrees just as closely - so this is specific to Koch's MC.
+     * placement of that point among the Koch cusps.
+     *
+     * <p>This used to disagree by exactly <b>60°</b> (216000.0000"): {@code swe_house_pos()}'s
+     * Koch branch computes a ratio, {@code dfac}, that is analytically exactly 0 or 2 when the
+     * target point <i>is</i> the MC or IC itself, and an unguarded {@code dfac > 2 || dfac < 0}
+     * check (inherited from upstream {@code swehouse.c} unchanged - not a defect introduced by
+     * this port) rejected the pure-Java engine's version of that razor's-edge case as
+     * "circumpolar" while the native library's own independently-rounded trig chain happened to
+     * land on the valid side. Fixed in {@code swe-java-lib}'s {@code SweHouse} with a
+     * {@code DFAC_TOLERANCE} epsilon, mirroring the file's own {@code VERY_SMALL} idiom. Measured
+     * after the fix: 0.0010".
      */
     @Test
-    void kochMcAuxiliaryColumnsDisagreeByExactlySixtyDegrees_knownDifference() {
+    void kochMcAuxiliaryColumnsAgreeWithinOneArcsecond() {
         final String commandLine = "-b1.1.2000 -p0 -house8,47,K -ut12:00 -fPGgj";
         final String n = run(nativeEph, commandLine);
         final String p = run(pureJavaEph, commandLine);
@@ -315,11 +311,11 @@ public class SwissEphEngineComparisonTest {
         assertTrue(ma.find() && mb.find(), "MC has no G column");
         final double diff = circularArcsecDiff(toDegrees(ma), toDegrees(mb));
         final String finalRowN = rowN, finalRowP = rowP;
-        assertTrue(diff > 215999.0 && diff < 216001.0, () -> String.format(Locale.ROOT,
-                "expected the known 60° (216000\") Koch MC gap, measured %.4f\"%n"
+        assertTrue(diff < 1.0, () -> String.format(Locale.ROOT,
+                "expected Koch's MC G column to agree within 1\", measured %.4f\"%n"
                         + "native: %s%npure java: %s", diff, finalRowN, finalRowP));
 
-        // and the Ascendant, right beside it in the same output, is not affected at all
+        // and the Ascendant, right beside it in the same output, agrees just as closely
         String ascN = null, ascP = null;
         for (int i = 0; i < Math.min(ln.length, lp.length); i++) {
             if (ln[i].startsWith("Ascendant")) { ascN = ln[i]; ascP = lp[i]; break; }

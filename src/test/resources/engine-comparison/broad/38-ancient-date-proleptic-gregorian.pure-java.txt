@@ -1,0 +1,7 @@
+-b4.4.1000greg -p0 -fPL -edirE:\Github\swe-jni-demo\ephe 
+date (dmy) 4.4.1000 greg.   0:00:00 TT		version 2.01.00
+UT:  2086395.483075711     delta t: 1462.258584 sec
+TT:  2086395.500000000
+Epsilon (t/m)     23°34'16.5348   23°34' 7.6331
+Nutation          -0° 0' 6.5634    0° 0' 8.9016
+Sun               13°43'34.2335

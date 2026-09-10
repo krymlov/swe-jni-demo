@@ -1,0 +1,9 @@
+-b1.1.2000 -p0 -lmt12:00 -geopos8,47,0 -fPL -edirE:\Github\swe-jni-demo\ephe 
+date (dmy) 1.1.2000 greg.   12:00:00 LMT		version 2.10.03
+LMT: 2451545.000000000
+UT:  2451544.977777778     delta t: 63.828915 sec
+TT:  2451544.978516538
+geo. long 8.000000, lat 47.000000, alt 0.000000
+Epsilon (t/m)     23°26'15.6366   23°26'21.4060
+Nutation          -0° 0'13.9317   -0° 0' 5.7694
+Sun              280°20'46.5527
