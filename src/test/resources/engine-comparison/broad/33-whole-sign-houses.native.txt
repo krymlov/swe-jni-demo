@@ -1,4 +1,4 @@
--b1.1.2000 -p0 -house8,47,W -ut12:00 -edire:\Github\swe-jni-demo\ephe 
+-b1.1.2000 -p0 -house8,47,W -ut12:00 -edirE:\Github\swe-jni-demo\ephe 
 date (dmy) 1.1.2000 greg.   12:00:00 UT		version 2.10.03
 UT:  2451545.000000000     delta t: 63.828915 sec
 TT:  2451545.000738760
@@ -6,7 +6,7 @@ geo. long 8.000000, lat 47.000000, alt 0.000000
 Epsilon (t/m)     23°26'15.6365   23°26'21.4060
 Nutation          -0° 0'13.9313   -0° 0' 5.7695
 Houses system W (equal/ whole sign) for long=   8° 0' 0.0000, lat=  47° 0' 0.0000
-Sun              280°22' 8.1076    0° 0' 0.8187    0.983327625    1° 1' 9.9631
+Sun              280°22' 8.1075    0° 0' 0.8185    0.983327625    1° 1' 9.9631
 house  1          30° 0' 0.0000  623° 4' 2.3546
 house  2          60° 0' 0.0000    0° 0' 0.0000
 house  3          90° 0' 0.0000    0° 0' 0.0000

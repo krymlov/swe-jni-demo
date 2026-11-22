@@ -5,18 +5,18 @@ TT:  2469901.015215919   ayanamsa =   24°33'46.4941 (Lahiri)
 geo. long 81.133333, lat 16.166667, alt 0.000000
 Epsilon (m)       23°25'57.8679
 Houses system P (Placidus) for long=  81° 7'59.9988, lat=  16°10' 0.0012
-Sun              350.3668986
-Moon             138.8290632
-Mercury           7.7151947
-Venus            13.3594080
-Mars             261.2657387
-Jupiter          90.1112061
-Saturn           282.8186221
-Uranus           143.0486954
-Neptune          29.7707225
-Pluto            315.2806719
+Sun              350.3668984
+Moon             138.8290641
+Mercury           7.7151946
+Venus            13.3594078
+Mars             261.2657386
+Jupiter          90.1112037
+Saturn           282.8186220
+Uranus           143.0486753
+Neptune          29.7706989
+Pluto            315.2806978
 mean Node        208.4657837
-true Node        206.8661950
+true Node        206.8661945
 house  1         164.4875203
 house  2         194.3209299
 house  3         224.2892710

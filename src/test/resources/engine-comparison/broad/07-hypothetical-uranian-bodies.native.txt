@@ -1,4 +1,4 @@
--b1.1.2000 -ph -fPL -edire:\Github\swe-jni-demo\ephe 
+-b1.1.2000 -ph -fPL -edirE:\Github\swe-jni-demo\ephe 
 date (dmy) 1.1.2000 greg.   0:00:00 TT		version 2.10.03
 UT:  2451544.499261244     delta t: 63.828499 sec
 TT:  2451544.500000000
@@ -19,6 +19,6 @@ Leverrier (Neptune)  203°42'57.4005
 Adams (Neptune)  195°42'41.5699
 Lowell (Pluto)   223° 6'39.4014
 Pickering (Pluto)  159°38'30.5374
-Vulcan           286°48' 6.5465
+Vulcan           286°48' 6.5464
 Selena/White Moon  242° 8'46.4331
 Waldemath         31°19'42.9907

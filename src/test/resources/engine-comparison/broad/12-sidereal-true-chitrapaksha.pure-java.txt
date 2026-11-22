@@ -4,12 +4,12 @@ UT:  2451544.499261249     delta t: 63.828083 sec
 TT:  2451544.500000000   ayanamsa =   23°50' 9.8871 (True Citra)
 Epsilon (m)       23°26'21.4066
 Sun              256.0223817
-Moon             193.4482638
-Mercury          247.2745791
+Moon             193.4482640
+Mercury          247.2745792
 Venus            217.1244382
 Mars             303.7388169
-Jupiter           1.3970213
+Jupiter           1.3970207
 Saturn           16.5698000
-Uranus           290.9479540
-Neptune          279.3391480
-Pluto            227.6010639
+Uranus           290.9479550
+Neptune          279.3391495
+Pluto            227.6010660

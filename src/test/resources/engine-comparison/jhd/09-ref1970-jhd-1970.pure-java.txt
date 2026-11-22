@@ -6,17 +6,17 @@ geo. long 81.133333, lat 16.166667, alt 0.000000
 Epsilon (m)       23°26'35.3370
 Houses system P (Placidus) for long=  81° 7'59.9988, lat=  16°10' 0.0012
 Sun              350.8721151
-Moon             328.5913798
+Moon             328.5913799
 Mercury           3.1186530
-Venus             7.9075814
+Venus             7.9075813
 Mars             26.6695545
-Jupiter          189.7668607
-Saturn           15.0968810
-Uranus           162.9847975
-Neptune          217.1713475
-Pluto            152.1286014
+Jupiter          189.7668613
+Saturn           15.0968811
+Uranus           162.9847997
+Neptune          217.1713451
+Pluto            152.1286110
 mean Node        316.8920777
-true Node        318.1384682
+true Node        318.1384676
 house  1         164.9771135
 house  2         194.8165164
 house  3         224.8057850
