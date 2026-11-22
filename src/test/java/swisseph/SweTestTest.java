@@ -227,6 +227,8 @@ public class SweTestTest {
             "-b1.1.2000 -testaa97",
             // -sidudef WITH a comma: the form that does not crash the reference program
             "-b1.1.2000 -p0 -sidudef2451545,24.5 -fPl",
+            // a known difference until 2026-11-22 - see amodEchoesTheModelsThatWereSet()
+            "-b1.1.2000 -p0 -amod1,2 -fPL",
     })
     void thePortPrintsWhatTheReferenceProgramPrints(String commandLine) {
         final String[] args = commandLine.split(" ");
@@ -234,7 +236,27 @@ public class SweTestTest {
     }
 
     /**
-     * The six command lines that do <b>not</b> match, each for a reason outside the port. They
+     * {@code -amod} used to be the sixth known difference. With {@code swed} as
+     * {@code __thread} (this workspace's one deliberate divergence, in {@code sweodef.h}) and
+     * {@code -O2} or above, {@code swe_get_astro_models()} echoed stale model numbers
+     * ({@code 0,0} for {@code 1,2}); a pure C probe reproduced it with no Java involved.
+     *
+     * <p>Since the {@code 2.10.03j6f} DLL of 2026-10-28 the echo is right, and the whole output is
+     * identical to the exe's. Found 2026-11-22, when the old assertion started failing; the C
+     * probe was not re-run. This pins the echo itself, so a returning stale echo fails here and
+     * not only as a whole-output diff.
+     */
+    @Test
+    void amodEchoesTheModelsThatWereSet() {
+        final String[] amod = {"-b1.1.2000", "-p0", "-amod1,2", "-fPL"};
+        assertEquals(reference(amod), port(amod));
+        assertTrue(port(amod).contains("-amod1,2,0,0,0,0,0,0,"), port(amod));
+        assertTrue(port(amod).contains("Delta T (long-term): Stephenson/Morrison 1984"), port(amod));
+        assertTrue(port(amod).contains("Precession: Laskar 1986"), port(amod));
+    }
+
+    /**
+     * The five command lines that do <b>not</b> match, each for a reason outside the port. They
      * are asserted to differ so that a fix elsewhere shows up as a failing test rather than as
      * nothing at all, and every one of them is paired with a control that must still match -
      * which is what makes this a diagnosis rather than a list of excuses.
@@ -247,16 +269,11 @@ public class SweTestTest {
      *
      * <p>{@code -sidudef<jd>} with no comma <b>segfaults the reference program</b> -
      * {@code swetest.c:927} calls {@code strstr(sp, "jdisut")} where {@code sp} is
-     * {@code strchr(s1, ',')}, so NULL when there is no comma. {@code -glp} prints the path of
-     * the running program and so can never agree. And {@code -amod} differs under the library
-     * rather than in either program: with {@code swed} as {@code __thread} - this workspace's
-     * one deliberate divergence in {@code sweodef.h} - and {@code -O2} or above,
-     * {@code swe_get_astro_models()} echoes stale model numbers. Reproduced in pure C with no
-     * Java involved; only the echo line is affected, and the models themselves are applied
-     * correctly, which the control below asserts.
+     * {@code strchr(s1, ',')}, so NULL when there is no comma. And {@code -glp} prints the path
+     * of the running program and so can never agree.
      */
     @Test
-    void theSixKnownDifferences() {
+    void theFiveKnownDifferences() {
         // the exe predates 16e1806 - and the port does what the source says
         final String[] roundmin = {"-b1.1.2000", "-p0", "-fPl", "-roundmin"};
         assertNotEquals(reference(roundmin), port(roundmin));
@@ -292,12 +309,6 @@ public class SweTestTest {
         // the path of the running program: java.exe on one side, swetest64.exe on the other
         final String[] glp = {"-b1.1.2000", "-p0", "-glp", "-fPL"};
         assertNotEquals(reference(glp), port(glp));
-
-        // under the library, not in the port: only the echo line moves, the models still apply
-        final String[] amod = {"-b1.1.2000", "-p0", "-amod1,2", "-fPL"};
-        assertNotEquals(reference(amod), port(amod));
-        assertTrue(port(amod).contains("Delta T (long-term): Stephenson/Morrison 1984"), port(amod));
-        assertTrue(port(amod).contains("Precession: Laskar 1986"), port(amod));
     }
 
     // ------------------------------------------------------------------ helpers

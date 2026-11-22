@@ -17,23 +17,23 @@ Neptune          257.6052041
 Pluto            205.4165213
 mean Node        11.0220133
 true Node        10.9160289
-house  1         184.1439331
-house  2         213.9239913
-house  3         243.7261653
-house  4         273.4647934
-house  5         303.8116963
-house  6         334.5856758
-house  7          4.1439331
-house  8         33.9239913
-house  9         63.7261653
-house 10         93.4647934
-house 11         123.8116963
-house 12         154.5856758
-Ascendant        184.1439331
-MC               93.4647934
-ARMC             104.5546855
-Vertex           323.0348966
-equat. Asc.      185.8948375
-co-Asc. W.Koch   188.1272014
-co-Asc Munkasey  176.4056957
-Polar Asc.        8.1272014
+house  1         184.1744846
+house  2         213.9540684
+house  3         243.7553327
+house  4         273.4941974
+house  5         303.8425100
+house  6         334.6173390
+house  7          4.1744846
+house  8         33.9540684
+house  9         63.7553327
+house 10         93.4941974
+house 11         123.8425100
+house 12         154.6173390
+Ascendant        184.1744846
+MC               93.4941974
+ARMC             104.5864415
+Vertex           322.9914214
+equat. Asc.      185.9290720
+co-Asc. W.Koch   188.1660227
+co-Asc Munkasey  176.4194453
+Polar Asc.        8.1660227
