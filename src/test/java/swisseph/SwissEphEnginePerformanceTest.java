@@ -63,12 +63,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * privately per Java object with nothing shared across the JVM, and running these 96 cases both
  * alone and as part of the full suite produced byte-identical pure-Java output every time. The
  * native library did not: {@code .native.txt} is always freshly overwritten, never compared,
- * because its own internal interpolation caches (nutation, obliquity) are not fully reset by
- * anything reachable from this class - not even {@code swe_close()} plus explicitly pinning the
- * tidal acceleration, both tried and measured to leave the same ~1e-4 arcsecond drift depending
- * on what other test classes happened to run first in the same JVM. Real, but two orders of
- * magnitude below anything a human comparing the two engines' output would ever look at, and not
- * a signal a byte-exact check could use honestly - so native's file is for reading, not gating.
+ * because it drifted by ~1e-4 arcsecond depending on what ran first in the same JVM. The cause was
+ * found on 2026-11-23: a {@code -nut} command line left {@code swe_set_interpolate_nut(1)} on, and
+ * {@code swe_close()} keeps it; {@code SweTest} now sets it on every run. The file is still for
+ * reading, not gating.
  *
  * <p>For {@code .pure-java.txt}: the first run for a given case simply writes the file; once it
  * exists and is committed, every later run instead <i>compares</i> against it and records a
@@ -224,11 +222,7 @@ public class SwissEphEnginePerformanceTest {
         final int index = CASE_INDEX.merge(category, 1, Integer::sum);
         final String relBase = category + "/" + String.format(Locale.ROOT, "%02d", index) + "-" + slug(label);
         // native.txt is always freshly overwritten, never regression-checked - see the class
-        // javadoc for why: the native library's own internal interpolation caches (nutation,
-        // obliquity) are not fully reset by anything this class can call, so its printed output
-        // can differ in its last one or two digits depending on what ran earlier in the same JVM,
-        // measured up to ~1e-4 arcsecond - real, but irrelevant to a human comparing it against
-        // pure-java's output, and not a signal a byte-exact regression check could use honestly.
+        // javadoc for why.
         writeText(new File(REF_DIR, relBase + ".native.txt"), null == nativeOut ? "" : nativeOut);
         // pure-java.txt IS regression-checked: swisseph.SwissEph holds its own state privately
         // per instance with nothing shared across the JVM, so it was measured fully reproducible

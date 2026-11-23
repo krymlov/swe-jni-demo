@@ -6,7 +6,7 @@ geo. long 81.133333, lat 16.166667, alt 0.000000
 Epsilon (m)       23°40'57.4140
 Houses system P (Placidus) for long=  81° 7'59.9988, lat=  16°10' 0.0012
 Sun              15.7976729
-Moon             94.6396894
+Moon             94.6396882
 Mercury           8.5124782
 Venus            55.3886326
 Mars             346.5099623
@@ -16,24 +16,24 @@ Uranus           63.7056336
 Neptune          88.5933719
 Pluto            349.9372676
 mean Node        151.2633766
-true Node        152.5010562
-house  1         190.1508424
-house  2         220.0118269
-house  3         250.0239873
-house  4         279.7483884
-house  5         309.8177111
-house  6         340.3930078
-house  7         10.1508424
-house  8         40.0118269
-house  9         70.0239873
-house 10         99.7483884
-house 11         129.8177111
-house 12         160.3930078
-Ascendant        190.1508424
-MC               99.7483884
-ARMC             97.8279770
-Vertex           346.6740691
-equat. Asc.      191.1098855
-co-Asc. W.Koch   192.3441325
-co-Asc Munkasey  185.9720269
-Polar Asc.       12.3441325
+true Node        152.5010480
+house  1         190.1503728
+house  2         220.0113606
+house  3         250.0235378
+house  4         279.7479423
+house  5         309.8172476
+house  6         340.3925278
+house  7         10.1503728
+house  8         40.0113606
+house  9         70.0235378
+house 10         99.7479423
+house 11         129.8172476
+house 12         160.3925278
+Ascendant        190.1503728
+MC               99.7479423
+ARMC             97.8274913
+Vertex           346.6749665
+equat. Asc.      191.1093570
+co-Asc. W.Koch   192.3435288
+co-Asc Munkasey  185.9718162
+Polar Asc.       12.3435288

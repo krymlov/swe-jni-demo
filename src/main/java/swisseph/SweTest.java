@@ -847,7 +847,9 @@ public class SweTest {
             smod = sdet.toString();
         }
         // the legacy signature takes AS_BOOL as an int, not a Java boolean
-        if (inut) sw.swe_set_interpolate_nut(1);
+        // and it is set both ways: swetest is a process, so a run without -nut must not inherit
+        // the interpolation an earlier run in this JVM switched on (swe_close() keeps it)
+        sw.swe_set_interpolate_nut(inut ? 1 : 0);
 
         if ((iflag & SEFLG_SIDEREAL) != 0 || do_ayanamsa) {
             if ((sid_mode & SE_SIDM_USER) != 0)

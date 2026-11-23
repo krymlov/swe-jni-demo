@@ -5,35 +5,35 @@ TT:  2342066.014525477   ayanamsa =   19°40'16.4006 (Lahiri)
 geo. long 81.133333, lat 16.166667, alt 0.000000
 Epsilon (m)       23°28'41.7380
 Houses system P (Placidus) for long=  81° 7'59.9988, lat=  16°10' 0.0012
-Sun              355.0369855
-Moon             184.8837398
-Mercury           4.7330482
-Venus            28.2667020
-Mars             215.8093514
+Sun              355.0369853
+Moon             184.8837404
+Mercury           4.7330480
+Venus            28.2667019
+Mars             215.8093515
 Jupiter          279.3598502
 Saturn           319.7769259
 Uranus           77.2607123
 Neptune          345.8845252
 Pluto            109.2691690
 mean Node        142.7148697
-true Node        143.8870418
-house  1         169.1219786
-house  2         198.9603213
-house  3         228.9359392
-house  4         258.6763550
-house  5         288.8056036
-house  6         319.4110682
-house  7         349.1219786
-house  8         18.9603213
-house  9         48.9359392
-house 10         78.6763550
-house 11         108.8056036
-house 12         139.4110682
-Ascendant        169.1219786
-MC               78.6763550
-ARMC             99.0888160
-Vertex           321.6942765
-equat. Asc.      170.2222343
-co-Asc. W.Koch   171.6331282
-co-Asc Munkasey  164.2922890
-Polar Asc.       351.6331282
+true Node        143.8870147
+house  1         169.1219698
+house  2         198.9603125
+house  3         228.9359308
+house  4         258.6763466
+house  5         288.8055948
+house  6         319.4110591
+house  7         349.1219698
+house  8         18.9603125
+house  9         48.9359308
+house 10         78.6763466
+house 11         108.8055948
+house 12         139.4110591
+Ascendant        169.1219698
+MC               78.6763466
+ARMC             99.0888069
+Vertex           321.6942930
+equat. Asc.      170.2222244
+co-Asc. W.Koch   171.6331169
+co-Asc Munkasey  164.2922850
+Polar Asc.       351.6331169
