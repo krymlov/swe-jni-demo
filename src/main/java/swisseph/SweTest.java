@@ -13,7 +13,7 @@ import org.swisseph.SwephNative;
  * <a href="https://www.astro.com/ftp/swisseph/src/swetest.c">swetest.c</a>
  * <p>
  * Every call that reaches Swiss Ephemeris goes through {@link #sw}, an
- * {@link org.swisseph.ISwissEph} - the same 106 entry points {@code SwephExp} declares, as
+ * {@link org.swisseph.ISwissEph} - the same 107 entry points {@code SwephExp} declares, as
  * instance methods rather than static ones, so this doubles as the largest worked example the
  * project has of using that layer directly: {@code double[]} out-parameters,
  * {@code StringBuilder} for {@code char*} buffers, and the {@code SE_*}/{@code SEFLG_*} flag

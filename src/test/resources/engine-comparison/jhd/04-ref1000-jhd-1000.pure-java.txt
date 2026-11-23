@@ -1,39 +1,39 @@
 -b4.4.1000 -ut12:20:40 -p0123456789mt -house81.133333,16.166667,P -sid1 -fPl -edirE:\Github\swe-jni-demo\ephe 
 date (dmy) 4.4.1000 jul.   12:20:40 UT		version 2.01.00
 UT:  2086402.014351852     delta t: 1473.451913 sec
-TT:  2086402.031405693   ayanamsa =    9°55'15.8542 (Lahiri)
+TT:  2086402.031405693   ayanamsa =    9°55'15.9845 (Lahiri)
 geo. long 81.133333, lat 16.166667, alt 0.000000
 Epsilon (m)       23°34' 7.6249
 Houses system P (Placidus) for long=  81° 7'59.9988, lat=  16°10' 0.0012
-Sun              10.1669236
-Moon             333.6105408
-Mercury          347.1831809
-Venus            55.2839454
-Mars             104.6494035
-Jupiter          276.4726468
-Saturn           42.7956108
-Uranus           328.2483973
-Neptune          257.6052041
-Pluto            205.4165213
-mean Node        11.0220133
-true Node        10.9160289
-house  1         184.1744846
-house  2         213.9540684
-house  3         243.7553327
-house  4         273.4941974
-house  5         303.8425100
-house  6         334.6173390
-house  7          4.1744846
-house  8         33.9540684
-house  9         63.7553327
-house 10         93.4941974
-house 11         123.8425100
-house 12         154.6173390
-Ascendant        184.1744846
-MC               93.4941974
+Sun              10.1668874
+Moon             333.6105046
+Mercury          347.1831447
+Venus            55.2839092
+Mars             104.6493673
+Jupiter          276.4726106
+Saturn           42.7955746
+Uranus           328.2483611
+Neptune          257.6051679
+Pluto            205.4164851
+mean Node        11.0219771
+true Node        10.9159927
+house  1         184.1744484
+house  2         213.9540321
+house  3         243.7552965
+house  4         273.4941612
+house  5         303.8424737
+house  6         334.6173028
+house  7          4.1744484
+house  8         33.9540321
+house  9         63.7552965
+house 10         93.4941612
+house 11         123.8424737
+house 12         154.6173028
+Ascendant        184.1744484
+MC               93.4941612
 ARMC             104.5864415
-Vertex           322.9914214
-equat. Asc.      185.9290720
-co-Asc. W.Koch   188.1660227
-co-Asc Munkasey  176.4194453
-Polar Asc.        8.1660227
+Vertex           322.9913852
+equat. Asc.      185.9290357
+co-Asc. W.Koch   188.1659865
+co-Asc Munkasey  176.4194091
+Polar Asc.        8.1659865

@@ -41,8 +41,12 @@ import static swisseph.SweTest.swe_test;
  */
 public class SweTestTest {
 
+    /** swetest built from {@code swisseph-2026}, the reference sources the DLL and this port follow
+     *  (until 2026-11-22: upstream's {@code windows/programs/swetest64.exe} of Aug 2024, older
+     *  than {@code swetest.c}, which is where four of the five known differences came from). */
     static final String SWETEST = System.getProperty("swetest.exe",
-            "E:/Github/swisseph/windows/programs/swetest64.exe");
+            System.getenv().getOrDefault("SWISSEPH_HOME", "<SWISSEPH_HOME unset>")
+                    + "/bin/swetest64.exe"); // $SWISSEPH_HOME = swisseph-2026, the reference
 
     static final File EPHE = new File("ephe").getAbsoluteFile();
 
@@ -225,8 +229,14 @@ public class SweTestTest {
             "-b1.1.2000 -p0 -at1013,10 -geopos8,47,0 -fPL",
             "-b1.1.2000 -p0 -obs30,60 -fPL",
             "-b1.1.2000 -testaa97",
-            // -sidudef WITH a comma: the form that does not crash the reference program
             "-b1.1.2000 -p0 -sidudef2451545,24.5 -fPl",
+            // known differences while the reference was upstream's Aug 2024 exe - see
+            // theOneKnownDifference(): 16e1806, ff04db0, 3fd0f95 and the -sidudef NULL dereference
+            "-b1.1.2000 -p0 -fPl -roundmin",
+            "-b1.1.2000 -p0 -fPL -lim",
+            "-b1.1.2000 -ps -xs433 -fPL -lim",
+            "-b1.1.2000 -p0 -astpos -n2",
+            "-b1.1.2000 -p0 -sidudef2451545 -fPl",
             // a known difference until 2026-11-22 - see amodEchoesTheModelsThatWereSet()
             "-b1.1.2000 -p0 -amod1,2 -fPL",
     })
@@ -237,7 +247,7 @@ public class SweTestTest {
 
     /**
      * {@code -amod} used to be the sixth known difference. With {@code swed} as
-     * {@code __thread} (this workspace's one deliberate divergence, in {@code sweodef.h}) and
+     * {@code __thread} (then a deliberate divergence in {@code sweodef.h}, gone since 2026-11-22) and
      * {@code -O2} or above, {@code swe_get_astro_models()} echoed stale model numbers
      * ({@code 0,0} for {@code 1,2}); a pure C probe reproduced it with no Java involved.
      *
@@ -256,59 +266,24 @@ public class SweTestTest {
     }
 
     /**
-     * The five command lines that do <b>not</b> match, each for a reason outside the port. They
-     * are asserted to differ so that a fix elsewhere shows up as a failing test rather than as
-     * nothing at all, and every one of them is paired with a control that must still match -
-     * which is what makes this a diagnosis rather than a list of excuses.
+     * The one command line that does <b>not</b> match: {@code -glp} prints the path of the running
+     * program, {@code java.exe} on one side and {@code swetest64.exe} on the other, so it can never
+     * agree. Asserted to differ so that a change shows up as a failing test.
      *
-     * <p>Three are the shipped executable being older than {@code swetest.c} (it is dated
-     * Aug 2024): {@code 16e1806} 2026-03-01 made {@code -roundmin} apply to output field
-     * {@code l}; {@code ff04db0} 2026-04-28 dropped {@code "&amp;&amp; ipl &gt; SE_AST_OFFSET"} so
-     * {@code -lim} prints the range line for ordinary planets too; {@code 3fd0f95} 2026-08-08
-     * added {@code -astpos} outright.
-     *
-     * <p>{@code -sidudef<jd>} with no comma <b>segfaults the reference program</b> -
-     * {@code swetest.c:927} calls {@code strstr(sp, "jdisut")} where {@code sp} is
-     * {@code strchr(s1, ',')}, so NULL when there is no comma. And {@code -glp} prints the path
-     * of the running program and so can never agree.
+     * <p>Until 2026-11-22 there were five. The reference was upstream's Aug 2024
+     * {@code windows/programs/swetest64.exe}, older than {@code swetest.c}: {@code 16e1806}
+     * ({@code -roundmin} for field {@code l}), {@code ff04db0} ({@code -lim} range line for planets),
+     * {@code 3fd0f95} ({@code -astpos}), and a NULL dereference for {@code -sidudef<jd>} without a
+     * comma. The swetest built from {@code swisseph-2026} has all of them, so those command lines
+     * are now in {@link #thePortPrintsWhatTheReferenceProgramPrints}.
      */
     @Test
-    void theFiveKnownDifferences() {
-        // the exe predates 16e1806 - and the port does what the source says
-        final String[] roundmin = {"-b1.1.2000", "-p0", "-fPl", "-roundmin"};
-        assertNotEquals(reference(roundmin), port(roundmin));
-        assertTrue(port(roundmin).contains("Sun              279.86"), port(roundmin));
-
-        // the exe predates ff04db0 - the asteroid case, which that commit did not touch, agrees
-        final String[] limPlanet = {"-b1.1.2000", "-p0", "-fPL", "-lim"};
-        assertNotEquals(reference(limPlanet), port(limPlanet));
-        assertTrue(port(limPlanet).contains("range "), port(limPlanet));
-        final String[] limAsteroid = {"-b1.1.2000", "-ps", "-xs433", "-fPL", "-lim"};
-        assertEquals(reference(limAsteroid), port(limAsteroid));
-
-        // The exe predates 3fd0f95 and rejects the option outright. It prints no argv echo
-        // when it does that, so dropFirstLine() takes the "illegal option" line itself and
-        // what is left is empty - the same shape as the segfault below, for a different reason.
-        final String[] astpos = {"-b1.1.2000", "-p0", "-astpos", "-n2"};
-        assertTrue(reference(astpos).isEmpty(), reference(astpos));
-        assertTrue(port(astpos).contains("Sun"), port(astpos));
-
-        // An upstream NULL dereference: the reference program dies part-way through. How much
-        // it manages to print first depends on how the process is started - nothing under an
-        // MSYS shell, a few buffered lines when Java starts it - so the assertion is only that
-        // the two differ and that the port completes the chart the C could not.
-        final String[] sidudef = {"-b1.1.2000", "-p0", "-sidudef2451545", "-fPl"};
-        assertNotEquals(reference(sidudef), port(sidudef));
-        assertTrue(port(sidudef).contains("ayanamsa"), port(sidudef));
-        // with a comma there is no crash and the two agree - including C's "(null)" for the
-        // name of a user-defined ayanamsa, which swe_get_ayanamsa_name() returns as NULL
-        final String[] withComma = {"-b1.1.2000", "-p0", "-sidudef2451545,24.5", "-fPl"};
-        assertEquals(reference(withComma), port(withComma));
-        assertTrue(port(withComma).contains("((null))"), port(withComma));
-
-        // the path of the running program: java.exe on one side, swetest64.exe on the other
+    void theOneKnownDifference() {
         final String[] glp = {"-b1.1.2000", "-p0", "-glp", "-fPL"};
         assertNotEquals(reference(glp), port(glp));
+        // the control: the same chart without -glp agrees
+        final String[] control = {"-b1.1.2000", "-p0", "-fPL"};
+        assertEquals(reference(control), port(control));
     }
 
     // ------------------------------------------------------------------ helpers

@@ -228,54 +228,37 @@ public class SwissEphEngineComparisonTest {
     }
 
     /**
-     * The whole-sign cusp <i>speed</i> column ({@code -fPLS}) used to disagree structurally: the
-     * pure-Java engine differenced every cusp's own position (self-consistent, but not what
-     * native reports for a snapped system), while native's {@code CalcH} (swehouse.c) never
-     * differentiates whole sign's cusps at all - its {@code case 'W'} sets no speed of its own,
-     * so eight of the twelve cusps (2, 3, 5, 6, 8, 9, 11, 12) keep a plain 0, and only 1/4/7/10
-     * carry the ascendant's or MC's own rate (1 and 7 from the ordinary pre-switch default, 4 and
-     * 10 by inheriting it through the generic opposite-cusp mirror every non-Gauquelin system
-     * gets). Fixed in {@code swe-java-lib}'s {@code SweHouse.differentiate()} to reproduce that
-     * exactly rather than approximate it by central differencing.
+     * The whole-sign cusp <i>speed</i> column ({@code -fPLS}). In {@code CalcH} of swisseph-2026
+     * ({@code swehouse.c}) {@code case 'W'} sets every cusp speed to 0 - the cusps sit on sign
+     * boundaries and stand still between ingresses - and {@code swe-java-lib}'s
+     * {@code SweHouse.differentiate()} does the same, so all twelve rows agree exactly.
      *
-     * <p>Measured after the fix: the eight sign-boundary cusps (2, 3, 5, 6, 8, 9, 11, 12) are
-     * 0.0000" in both engines - the structural gap this test used to document is gone. The
-     * ascendant/MC pair and their opposites (1, 4, 7, 10) still carry the same small
-     * engine-to-engine noise the ascendant/descendant speed already has elsewhere in this class
-     * (differencing a position over a one-second interval amplifies the two engines' ordinary
-     * sub-arcsecond position disagreement) - measured 12.17" on 1/7, 6.56" on 4/10, well inside
-     * the 20" this asserts.
+     * <p>Until 2026-11-22 the DLL was built from the older swehouse.c, where cusps 1/7 carried the
+     * ascendant's speed and 4/10 the MC's; the two engines then differed there by 12.17" and 6.56"
+     * (differencing noise), and this asserted 20".
      */
     @Test
-    void wholeSignHouseCuspSpeedsAgreeWithinTwentyArcseconds() {
+    void wholeSignHouseCuspSpeedsAreAllZeroInBothEngines() {
         final String commandLine = "-b1.1.2000 -p0 -house8,47,W -ut12:00 -fPLS";
         final String n = run(nativeEph, commandLine);
         final String p = run(pureJavaEph, commandLine);
         final String[] ln = n.split("\n", -1), lp = p.split("\n", -1);
 
-        double worstBoundary = 0, worstAscMc = 0;
-        int boundaryRows = 0, ascMcRows = 0;
+        int rows = 0;
         for (int i = 0; i < Math.min(ln.length, lp.length); i++) {
-            final java.util.regex.Matcher house = Pattern.compile("^house\\s+(\\d+)").matcher(ln[i]);
+            final Matcher house = Pattern.compile("^house\\s+(\\d+)").matcher(ln[i]);
             if (!house.find()) continue;
-            final int hn = Integer.parseInt(house.group(1));
             final Matcher ma = DMS.matcher(ln[i]), mb = DMS.matcher(lp[i]);
             assertTrue(ma.find() && mb.find(), "cusp longitude"); // token 1: the cusp itself
             if (!(ma.find() && mb.find())) fail("house row is missing its speed column: " + ln[i]);
-            final double diff = circularArcsecDiff(toDegrees(ma), toDegrees(mb));
-            final boolean ascMc = hn == 1 || hn == 4 || hn == 7 || hn == 10;
-            if (ascMc) { worstAscMc = Math.max(worstAscMc, diff); ascMcRows++; }
-            else { worstBoundary = Math.max(worstBoundary, diff); boundaryRows++; }
+            final double speedNative = toDegrees(ma), speedJava = toDegrees(mb);
+            assertEquals(0., speedNative, 0., () -> "native speed of house " + house.group(1)
+                    + "\nnative:\n" + n);
+            assertEquals(0., speedJava, 0., () -> "pure-Java speed of house " + house.group(1)
+                    + "\npure java:\n" + p);
+            rows++;
         }
-        assertEquals(4, ascMcRows, "expected exactly 4 ascendant/MC houses (1, 4, 7, 10)");
-        assertEquals(8, boundaryRows, "expected exactly 8 sign-boundary houses");
-        final double finalWorstBoundary = worstBoundary, finalWorstAscMc = worstAscMc;
-        assertTrue(worstBoundary < 0.001, () -> String.format(Locale.ROOT,
-                "expected the eight sign-boundary cusps to agree exactly, measured %.4f\"%n"
-                        + "native:%n%s%npure java:%n%s", finalWorstBoundary, n, p));
-        assertTrue(worstAscMc < 20.0, () -> String.format(Locale.ROOT,
-                "expected the ascendant/MC cusps to agree within 20\", measured %.4f\"%n"
-                        + "native:%n%s%npure java:%n%s", finalWorstAscMc, n, p));
+        assertEquals(12, rows, "expected 12 house rows");
     }
 
     /**
