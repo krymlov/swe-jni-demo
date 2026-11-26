@@ -5,4 +5,4 @@ TT:  2451544.500000000
 Epsilon (t/m)     23°26'15.6467   23°26'21.4066
 Nutation          -0° 0'13.9311   -0° 0' 5.7600
 error: illegal planet number 9501.
-9501               0° 0' 0.0000
+9501: not found (planetary moon)    0° 0' 0.0000
